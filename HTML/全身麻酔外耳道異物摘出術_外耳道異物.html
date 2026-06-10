@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-11 00:12:48
+  Meta:images: 
+-->
+  <title>患者説明資料</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">患者説明資料</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>患者説明資料</h1>
+
+
+      </section>
+
+      <section class="section-block">
+      <h2>全身麻酔 外耳道異物摘出術 手術説明書</h2>
+        <h3>1\. 病名</h3>
+        <p>
+          外耳道異物
+        </p>
+        <h3>2\. 予定される手術</h3>
+        <p>
+          日付：
+          入院期間： 1泊2日
+          術側：
+        </p>
+        <h3>3\. 手術の目的</h3>
+        <p>
+          外耳道内に入り込んだ異物を安全に摘出し、それによって引き起こされる痛み、炎症、感染、聴力低下などの症状を改善、または予防することを目的とします。
+        </p>
+        <h3>4\. 手術の方法</h3>
+        <p>
+          本手術は全身麻酔で行います。
+          口から管を入れて人工呼吸を行い、麻酔を維持します。
+          顕微鏡や内視鏡を用いて耳の中を詳細に観察しながら、専用の器具（鉗子、吸引管など）を使い、慎重に異物を摘出します。
+          異物が外耳道の壁に深く嵌り込んでいる場合や、摘出操作を安全に行うために視野を確保する必要がある場合には、外耳道の入口部の皮膚を小さく切開することがあります。切開した皮膚は、手術の最後に縫合します。
+        </p>
+        <h3>5\. 手術によって期待される効果</h3>
+        <ul>
+          <li>異物が取り除かれることによる、痛みや違和感の解消</li>
+          <li>外耳道の炎症や感染の治癒、予防</li>
+          <li>異物による聞こえにくさの改善</li>
+        </ul>
+        <h3>6\. 手術に伴う危険性・合併症</h3>
+        <p>
+          手術は安全に配慮して行いますが、以下の危険性・合併症が起こる可能性があります。
+        </p>
+        <ul>
+          <li><strong>外耳道の損傷：</strong> 手術操作により、外耳道の皮膚に擦り傷や切り傷が生じることがあります。通常は自然に治癒しますが、出血や感染の原因となることがあります。</li>
+          <li><strong>鼓膜の損傷：</strong> 異物が鼓膜に接している場合や、摘出操作の際に、鼓膜に穴が開く（鼓膜穿孔）ことがあります。小さな穴であれば自然に閉じることが多いですが、大きな穴が残った場合は、将来的に鼓膜を閉じるための追加手術が必要になる可能性があります。</li>
+          <li><strong>出血・感染：</strong> 手術中や手術後に出血したり、傷から細菌が入って感染を起こしたりすることがあります。感染予防のために抗生剤を使用することがあります。</li>
+          <li><strong>聴力低下・耳鳴り・めまい：</strong> まれに、手術操作による影響で、一時的または永続的な聴力低下、耳鳴り、めまいが起こることがあります。</li>
+        </ul>
+        <h3>7\. 手術後の経過と注意点</h3>
+        <ul>
+          <li><strong>安静：</strong> 手術当日は麻酔の影響が残っているため、ベッド上で安静にしていただきます。</li>
+          <li><strong>痛み：</strong> 手術後に耳の痛みが出ることがありますが、痛み止めで対応します。</li>
+          <li><strong>入浴：</strong> 退院後の入浴は可能ですが、医師の許可があるまで耳にお湯が入らないように注意してください。</li>
+          <li><strong>通院：</strong> 退院後は外来で術後の経過を観察します。医師の指示に従って通院してください。</li>
+        </ul>
+        <h3>8\. その他</h3>
+        <ul>
+          <li>手術中に予期せぬ状況が発生した場合、患者さんの安全と最善の治療結果を得るために、やむを得ず手術方法を変更したり、追加の手術を行ったりする可能性があります。その際は、可能な限り速やかにご本人またはご家族にご説明いたします。</li>
+        </ul>
+        <h3>9\. 代替可能な治療法</h3>
+        <p>
+          外耳道に異物が存在する場合、自然に排出されることはまれであり、放置すると感染や炎症、鼓膜損傷のリスクが高まるため、手術以外に有効な治療法はありません。外来での摘出が困難な場合、安全かつ有効な手段として全身麻酔下での手術が選択されます。
+        </p>
+        <h3>10\. 手術を受けなかった場合に予想されること</h3>
+        <p>
+          異物を放置した場合、以下のようなことが予想されます。
+        </p>
+        <ul>
+          <li>外耳道の皮膚が傷つき、強い痛みや出血、慢性的・反復的な感染（外耳道炎）を引き起こす可能性があります。</li>
+          <li>異物が奥に移動し、鼓膜を傷つけたり、穴を開けたりする可能性があります。</li>
+          <li>長期間放置されると、異物の周りに肉芽（にくげ）という組織ができて摘出がより困難になったり、異物が耳垢などと固まって「耳垢栓塞（じこうせんそく）」の状態となり、聴力低下を引き起こしたりすることがあります。</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-11 00:12:48
+  Meta:images: 
+-->
+  <title>全身麻酔と禁煙説明書</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">全身麻酔と禁煙説明書</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>全身麻酔と禁煙説明書</h1>
+
+
+      </section>
+
+      <section class="section-block">
+      <h2>全身麻酔で手術を受けられる方に</h2>
+        <p>
+          あなたの麻酔は、全身麻酔(気管挿管麻酔、マスク麻酔)単独、またはこれに局所麻酔(脊椎麻酔、硬膜外麻酔、神経ブロック)の併用を考えています。この麻酔法は、いろいろな利点がありますが欠点もあります。しかし、患者さんにとってはもっとも良い方法だと考えています。
+        </p>
+        <p>
+          手術室に向かう前に、看護師がいろいろな前処置を行います。手術前の絶飲食にもご協力ください。手術中の有害反射を防止するために麻酔前の投薬があることもあります。時計、指輪や入れ歯は、必ずはずしておいてください。
+        </p>
+        <p>
+          手術室に到着すると心電計、血圧計などを装着し、点滴を開始します。(点滴は病室であらかじめ始めることもあります)
+        </p>
+        <p>
+          気管挿管麻酔のさいには、あらかじめ全身麻酔薬と筋弛緩薬を投与して、眠っている間に喉頭鏡を用いて、気管の入り口を見ながら気管内チューブを注意深く挿入します。このとき、「ぐらぐら」している歯が抜けることもありますので、動いている歯があれば手術前にあらかじめ申し出てください。このほか、頸の動きの悪い方や、口の開き方が良くない方も申し出てください。
+        </p>
+        <p>
+          手術中は、麻酔担当医があなたの状態と手術の状態を見ながら、あなたに呼吸をさせたり、補液をして、血圧が安定するよう麻酔の管理に務めます。このとき、患者さんの安全を守るために、医師の判断で、必要な処置をする場合もありますのでご了承をお願いいたします。
+        </p>
+        <p>
+          手術が終わると、まもなく目が覚めますのでご安心ください。麻酔が終わると、医師が声を掛けますので、できるだけ元気な声で応答してください。気管挿管麻酔を行うと、手術後2\<br>3日間は、「のど」が痛くなることがあります。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>麻酔のむずかしさと危険度について</h2>
+        <p>
+          手術には小手術があっても、全身麻酔には小麻酔はありません。どんな手術の麻酔であっても、ひとたび全身麻酔が開始されると、患者さんの病状、年齢、栄養状態などによって、予測もできないいろいろな偶発合併症が発生することがあります。ときには、重篤な偶発合併症によって回復が遅れたり、死亡にいたることもあります。私たちは能力の限りを尽くして、患者さんの安全を守るために、最善の努力をいたします。つきましては、患者さんや、ご家族、ご親類の方々に関する情報もお聞きします。これは手術中の患者さんの全身管理に役立てるためですので、ご協力をお願いいたします。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>麻酔に伴う危険性についてご承知いただきたいこと</h2>
+        <p>
+          麻酔技術、麻酔薬、麻酔監視装置(モニター)などの進歩·向上により、麻酔に伴う危険性は著しく低下してきています。しかし、麻酔に限らず、あらゆる治療には多少なりとも危険が伴います。危険の度合いは手術の内容や患者さんの全身状態、体質などによって異なります。当病院では患者さんの安全を第一に、日本麻酔科学会の「安全基準」に従った麻酔業務をしており、合併症の発生防止に努めております。しかしながら、まれではありますが、以下のような合併症が起こる危険性があることをご理解下さい。
+        </p>
+        <h3>全身麻酔にともなうもの</h3>
+        <p>
+          一時的な悪心·嘔吐、頭痛。のどの痛み、声のかれ(嗄声)。
+          歯牙のぐらつき、脱落。口唇や鼻腔からの出血。薬剤アレルギー。
+          特殊な体位を保持することによる筋力低下、四肢の痛み。
+          開腹·開胸術などに伴う息苦しさ、呼吸不全。
+          肺炎、気管支炎などの感染症。
+        </p>
+        <h3>非常にまれな合併症</h3>
+        <p>
+          体温の上昇や下降に伴う全身の臓器障害。心臓、肺臓、肝臓、腎臓などの機能低下(心筋梗塞、狭心症、肺梗塞も含む)。
+          脳、脊髄、神経系の障害、痙攣、意識レベルの低下。
+          血流障害に伴う多臓器不全。アナフィラキシーショック。
+          麻酔が浅くなったことにより手術中の記憶が残存。
+          注射部位や脊髄周囲の細菌感染、膿瘍形成。カテーテル挿入に伴う出血や神経障害。
+          大出血による心停止、中枢神経系の不可逆的障害。
+        </p>
+        <p>
+          命に関わるような重篤な合併症の危険率は、麻酔症例10万例に1例程度と報告されています。合併症を疑わせる症状が認められた場合は、患者さんの救命ならびに後遺症を最小限にするためのあらゆる努力を致しますが、その際には、予定されていた手術や検査とは異なった処置と治療が行われることもあります。麻酔を含む医療行為は患者さんの了解なしには行えません。不安に思われること、疑問に感じられることがありましたら、遠慮なくご質問下さい。
+          診療科医師が麻酔を担当する場合がありますが、その場合でも麻酔科スタッフがサポートする体制をとっています。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>全身麻酔を受ける患者様へ ～手術の安全と禁煙のお願い～</h2>
+        <h3>Point（はじめに）</h3>
+        <p>
+          手術の安全性を確保し、術後の回復を早めるために、本日から手術後まで<strong>「完全禁煙」</strong>をお願いいたします。（加熱式タバコ・電子タバコも同様です）
+        </p>
+        <h3>Reason（なぜ禁煙が必要なのか）</h3>
+        <p>
+          タバコに含まれる有害物質は、全身麻酔中の呼吸管理を困難にし、手術の合併症リスクを通常の数倍に引き上げてしまうからです。これは手術の大小に関わらず、すべての患者様に当てはまります。
+        </p>
+        <h3>Example（具体的なリスク）</h3>
+        <p>
+          喫煙を続けると、主に以下の3つの危険性が高まります。
+        </p>
+        <ol>
+          <li>肺炎・呼吸トラブルの危険</li>
+        </ol>
+        <p>
+          タバコの影響で痰（たん）が増え、それを排出する機能が低下します。これにより、術後肺炎や、肺が潰れてしまう無気肺といった呼吸器合併症のリスクが非常に高くなります。
+        </p>
+        <ol>
+          <li>酸欠（酸素不足）の危険</li>
+        </ol>
+        <p>
+          血液が一酸化炭素と結びつき、体中に十分な酸素を運べなくなります。手術中、心臓や脳への酸素供給が不足する恐れがあります。
+        </p>
+        <ol>
+          <li>傷の治りが悪くなる</li>
+        </ol>
+        <p>
+          ニコチンが血管を収縮させ、血流を悪くします。手術の傷口の治りが遅くなるだけでなく、傷口が細菌に感染しやすくなります。
+        </p>
+        <h3>Point（いつからやめるべきか）</h3>
+        <ul>
+          <li><strong>理想は4週間前から：</strong> 呼吸機能の改善が見込め、合併症リスクが下がります。</li>
+          <li><strong>直前でも効果あり：</strong> たとえ手術の数日前であっても、体内の一酸化炭素を減らし、酸素運搬能力を回復させる効果があります。しかし、「今」やめることが、あなたの安全のために大事です。</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>

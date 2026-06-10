@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-11 00:12:48
+  Meta:images: 
+-->
+  <title>患者説明資料</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">患者説明資料</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>患者説明資料</h1>
+
+        <h3>コア針生検 患者説明文書</h3>
+        <h3># 1\. 病名・症状</h3>
+        <ul>
+          <li><strong>病名</strong>: 頸部腫瘤（けいぶしゅりゅう）</li>
+          <li><strong>症状</strong>: 現在、あなたの首に「しこり」や「腫れ」が認められます。</li>
+        </ul>
+        <h3># 2\. 現在の状態</h3>
+        <p>
+          診察および画像検査（超音波検査やCT検査など）の結果、首にしこり（腫瘤）が見つかりました。このしこりがどのような性質のもの（例えば、炎症によるものか、良性の腫瘍か、悪性の腫瘍かなど）を正確に診断するために、さらに詳しい検査が必要な状態です。現在の段階では、画像検査だけでは確定的な診断が困難です。
+        </p>
+        <h3># 3\. 今後行う診療や処置、検査の内容</h3>
+        <h3>## 検査名：コア針生検（Core Needle Biopsy: CNB）</h3>
+        <ul>
+          <li>目的</li>
+        </ul>
+        <p>
+          しこりの一部を採取し、それを顕微鏡で詳しく調べる「病理組織検査」を行うことで、病気の確定診断を行います。 この診断結果をもとに、今後の最適な治療方針（手術、放射線治療、薬物療法など）を決定します。
+        </p>
+        <ul>
+          <li><strong>検査の具体的な流れ</strong></li>
+        <ol>
+          <li><strong>体勢と準備</strong>: ベッドに仰向け、または横向きになっていただきます。 超音波（エコー）やCTを使って、針を刺すのに最も安全で正確な場所を確認します。</li>
+          <li><strong>麻酔</strong>: 針を刺す部分の皮膚に、局所麻酔の注射をします。 これにより、検査中の痛みは大幅に軽減されます。</li>
+          <li><strong>穿刺（せんし）</strong>: 麻酔が効いたことを確認した後、皮膚を数ミリ小さく切開し、そこから専用の針（ボールペンの芯程度の太さ）をしこりまで進めます。</li>
+          <li><strong>組織の採取</strong>: 医師が針の位置を最終確認した後、装置を作動させます。「バチン」という音とともに、瞬時に針が動いてしこりの組織の一部を切り取ります。 正確な診断のために、通常この操作を2～3回繰り返します。</li>
+          <li><strong>終了後の処置</strong>: 検査が終わったら、出血を防ぐために針を刺した場所を5～10分ほど圧迫します。 小さな傷はテープで保護するか、場合によっては1針縫合することもあります。</li>
+          <li><strong>所要時間</strong>: 検査全体で20～30分程度です。</li>
+          <li><strong>検査後</strong>: 検査後は、出血などの合併症がないか確認するために、しばらく院内で安静にしていただきます。医師の判断により、経過観察のために一泊入院となる場合もあります。</li>
+        </ul>
+        </ol>
+        <h3># 4\. 今後起こりうること</h3>
+        <ul>
+          <li><strong>検査により期待されること</strong></li>
+          <li>しこりの正体が明らかになり、正確な診断がつきます。</li>
+          <li>診断結果に基づき、あなたにとって最適な治療方針を立てることができます。</li>
+          <li>体への負担が大きい手術（診断のための開放生検）をせずに、診断がつく可能性があります。</li>
+          <li>起こりうる合併症やリスク</li>
+        </ul>
+        <p>
+          コア針生検は比較的安全な検査ですが、以下の様な合併症が起こる可能性も稀にあります。
+        </p>
+        <ul>
+          <li><strong>出血・血腫</strong>: 最も起こりやすい合併症です。通常は圧迫することで止血できますが、皮下に出血して青あざや血のかたまり（血腫）ができることがあります。</li>
+          <li><strong>痛み</strong>: 検査後に麻酔が切れると、針を刺した部分に痛みが出ることがあります。通常は数日で治まりますが、必要に応じて痛み止めを処方します。</li>
+          <li><strong>感染</strong>: まれに、針を刺した部分から細菌が入り、赤く腫れたり熱を持ったりすることがあります。</li>
+          <li><strong>神経の損傷</strong>: 非常にまれですが、針が近くの神経に触れると、一時的なしびれや麻痺（顔面神経麻痺など）が起こることが報告されています。</li>
+          <li><strong>播種（はしゅ）</strong>: 悪性腫瘍であった場合、針の通り道にがん細胞がこぼれ落ちる可能性はゼロではありませんが、その頻度は極めて低いとされています。</li>
+          <li><strong>診断がつかない可能性</strong>: 採取した組織の量が少なかったり、しこりの中心部から組織が採取できなかったりした場合、一度の検査では診断がつかないことがあります。 その際は、再度検査を行うか、別の方法（手術による生検など）を検討します。</li>
+        </ul>
+        <h3>よくあるご質問（Q\&A）</h3>
+        <p>
+          Q1. 検査は痛いですか？
+          A1. 検査の前には、歯の治療などで行うのと同じ局所麻酔の注射をしますので、検査中の強い痛みはありません。 麻酔の注射の際にチクッとした痛みを感じます。組織を採取する瞬間には、「バチン」という音と、体を押されるような感覚がありますが、痛みはほとんど感じない方が多いです。検査後に麻酔が切れて痛む場合は、痛み止めで対応できますので、我慢せずにお知らせください。
+          Q2. 以前受けた「穿刺吸引細胞診」とはどう違うのですか？
+          A2. 「穿刺吸引細胞診（FNA）」は、注射で使うような細い針で細胞を吸い取る検査です。 一方、今回行う「コア針生検（CNB）」は、それより少し太い針を使って、細胞のかたまり（組織）を筒状に切り取ります。 組織を採取することで、細胞の「顔つき」だけでなく、細胞同士の並び方や構造まで詳しく観察できるため、より多くの情報を得られ、正確な診断につながります。 特に、がんのタイプを特定するための特殊な染色や遺伝子検査には、ある程度の組織量が必要となるため、この検査が重要になります。
+          Q3. 血液をサラサラにする薬（抗凝固薬や抗血小板薬）を飲んでいますが、検査は受けられますか？
+          A3. はい、受けられますが、事前の準備が必要です。これらの薬は血を止まりにくくするため、検査中の出血のリスクを高めます。 そのため、安全に検査を行うために、検査の数日前から一時的にお薬を休んでいただく必要があります。 必ず、現在服用中のお薬（お薬手帳など）を医師・看護師に見せてください。ご自身の判断でお薬を中止することは絶対にしないでください。
+          Q4. 検査後の生活で気をつけることはありますか？
+          A4. 検査当日は、激しい運動は避けてください。入浴は、傷口から感染するのを防ぐため、湯船に浸かるのは避け、シャワー程度にしてください。翌日以降は、医師の指示に従ってください。また、検査した場所がひどく腫れたり、痛みが強くなったり、熱が出たりした場合は、すぐに病院にご連絡ください。
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>

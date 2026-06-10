@@ -21,6 +21,3 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Project specific build outputs
-HTML/
-

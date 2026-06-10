@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-11 00:12:49
+  Meta:images: 
+-->
+  <title>頸部リンパ節生検を受けられる患者さんへ</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">頸部リンパ節生検を受けられる患者さんへ</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>頸部リンパ節生検を受けられる患者さんへ</h1>
+
+
+      </section>
+
+      <section class="section-block">
+      <h2>はじめに</h2>
+        <p>
+          この検査は「頸部リンパ節生検」といい、腫れているリンパ節の一部または全部を採取し、顕微鏡などで詳しく調べることで、正確な診断を行うために非常に重要なものです。通常、2泊3日の入院が必要です。
+        </p>
+        <p>
+          この説明書では、検査の目的、方法、検査後の注意点、起こりうる合併症などについてご説明します。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>検査の目的</h2>
+        <p>
+          首のリンパ節が腫れる原因は様々ですが、時に悪性リンパ腫などの病気が隠れていることがあります。頸部リンパ節生検は、腫れているリンパ節の組織を直接調べることで、腫れの原因を特定し、適切な治療方針を決定することを目的としています。特に、悪性リンパ腫が疑われる場合には、診断を確定するために十分な量の組織の塊を取ってくることが大切です。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>検査の方法</h2>
+        <h3>麻酔について</h3>
+        <p>
+          検査は、手術室にて全身麻酔で行います。全身麻酔とは、麻酔薬を点滴から投与したり、吸入したりすることで、一時的に意識がなくなり、痛みを感じない状態にする方法です。検査中は麻酔科医が全身の状態を管理します。
+        </p>
+        <p>
+          点滴の針を刺す際に、チクッとした痛みを感じることがあります。
+        </p>
+        <h3>手術室での検査</h3>
+        <ol>
+          <li>手術室に入室後、血圧計や心電図などを装着し、体の状態を確認しながら安全に検査を進めます。</li>
+          <li>皮膚を消毒し、清潔な布で体を覆います。</li>
+          <li>医師が腫れているリンパ節上の皮膚を数センチ程度切開し、リンパ節を採取します。採取するリンパ節の大きさや場所によって、切開の大きさや場所は多少異なります。 術部位は手術室で診察し最終決定します。</li>
+          <li>リンパ節を採取した後、出血がないことを確認し、傷を縫い合わせます。</li>
+          <li>創部を透明な防水テープで覆い、ガーゼと弾力テープで圧迫します。（圧迫は翌日に解除予定です）</li>
+        </ol>
+        <p>
+          通常、検査にかかる時間は30分～1時間程度ですが、状況により多少前後することがあります。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>検査前の準備</h2>
+        <ul>
+          <li><strong>食事について</strong> ：全身麻酔を行うため、検査前は絶食・絶水が必要です。具体的な時間については、別途医師または看護師から指示がありますので、それに従ってください。</li>
+          <li><strong>お薬について</strong> ：普段服用されているお薬については、必ず事前に医師にお知らせください。特に血液をサラサラにするお薬（抗凝固薬や抗血小板薬など）を服用されている場合は、休薬が必要になることがありますので、医師の指示に従ってください。</li>
+          <li><strong>その他</strong> ：</li>
+          <li>検査当日は、ゆったりとした服装でお越しください。</li>
+          <li>貴金属類（指輪、ネックレス、ピアスなど）は、検査前に外していただくようお願いします。</li>
+          <li>マニキュアやジェルネイルは、検査前に落としておいてください。</li>
+          <li>コンタクトレンズを使用されている方は、検査前に外していただくか、メガネをご持参ください。</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>検査後の注意点</h2>
+        <ul>
+          <li><strong>安静について</strong> ：検査当日は、激しい運動や飲酒は避けて、なるべく安静にお過ごしください。</li>
+          <li><strong>傷口について</strong> ：</li>
+          <li>傷口は、医師の指示があるまで濡らさないようにしてください。シャワーや入浴については、翌日から可能な場合が殆どです。</li>
+          <li>傷口に痛みや腫れ、出血、熱感などがみられる場合は、速やかにご連絡ください。</li>
+          <li><strong>お薬について</strong> ：痛み止めや抗生物質が処方された場合は、医師の指示通りに服用してください。</li>
+          <li><strong>抜糸について</strong> ：吸収糸を使うので抜糸不要です。</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>起こりうる合併症・偶発症</h2>
+        <p>
+          頸部リンパ節生検は比較的安全な検査ですが、稀に以下のような合併症・偶発症が起こる可能性があります。
+        </p>
+        <ul>
+          <li><strong>出血</strong> ：検査中や検査後に、傷口から出血することがあります。多くは圧迫などで止血できますが、稀に再手術が必要になることもあります。</li>
+          <li><strong>感染</strong> ：傷口から細菌が入り、感染を起こすことがあります。予防のために抗生物質を投与することがあります。</li>
+          <li><strong>痛み・腫れ</strong> ：検査後に傷口の痛みや腫れが続くことがあります。通常は数日で軽快しますが、症状が強い場合は医師にご相談ください。</li>
+          <li><strong>神経損傷</strong> ：首には様々な神経が通っています。非常に稀ですが、リンパ節の近くにある神経が傷つき、一時的または永続的なしびれや麻痺（顔面神経麻痺による口のゆがみ、肩が挙上しにくくなるなど）が起こることがあります。細心の注意を払って検査を行いますが、完全に避けることが難しい場合もあります。</li>
+          <li><strong>傷跡（瘢痕）</strong> ：切開した部分には傷跡が残ります。体質によっては、ケロイド状になることもあります。</li>
+        </ul>
+        <p>
+          これらの合併症・偶発症が起こらないように万全の体制で検査を行いますが、万が一起こった場合には、速やかに適切な処置を行います。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>検査結果について</h2>
+        <p>
+          採取したリンパ節は、病理検査という専門の検査に提出されます。結果が出るまでには、通常1～2週間程度かかります。結果が出ましたら、外来にてご説明します。
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>

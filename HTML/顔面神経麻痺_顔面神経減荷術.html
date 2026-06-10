@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-11 00:12:49
+  Meta:images: 
+-->
+  <title>顔面神経減荷術の手術説明書</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">顔面神経減荷術の手術説明書</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>顔面神経減荷術の手術説明書</h1>
+
+
+      </section>
+
+      <section class="section-block">
+      <h2>1\. 病名</h2>
+        <p>
+          <strong>顔面神経麻痺（がんめんしんけいまひ）</strong>
+        </p>
+        <ul>
+          <li><strong>どのような病気か:</strong></li>
+          <li>顔面神経（顔の筋肉を動かす神経）が、何らかの原因（ウイルス感染、炎症、むくみ、骨折など）によって側頭骨内の狭い骨管（顔面神経管）の中で圧迫され、機能が障害される病気です。</li>
+          <li>これにより、顔の片側（または両側）の筋肉が動かしにくくなり、目が閉じにくい、口角が下がる、口から水がもれる、味がわかりにくいなどの症状が出現します。</li>
+          <li>原因によっては、耳の痛み、めまい、難聴などを伴うこともあります。</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>2\. 予定される手術</h2>
+        <p>
+          <strong>顔面神経減荷術（がんめんしんけいげんかじゅつ）</strong>
+        </p>
+        <ul>
+          <li><strong>麻酔:</strong> 全身麻酔</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>3\. 手術の目的と必要性</h2>
+        <ul>
+          <li><strong>目的:</strong></li>
+        <ol>
+          <li><strong>顔面神経の圧迫解除:</strong> 顔面神経が通る骨の管（顔面神経管）の一部を開放し、腫れて圧迫されている神経への圧力を取り除きます（減荷）。</li>
+          <li><strong>神経機能の回復促進:</strong> 神経への圧迫を取り除くことで、血流を改善し、神経の回復を助けることを目指します。</li>
+          <li><strong>後遺症の軽減:</strong> 完全な回復が得られない場合でも、病的共同運動（意図しない顔の動き）などの後遺症を少しでも軽減することを目指します。</li>
+          <li><strong>必要性:</strong></li>
+          <li>顔面神経麻痺の多くは薬物療法（ステロイド、抗ウイルス薬など）で改善しますが、重度の麻痺や、薬物療法で十分な回復が見込めないと判断される場合、または外傷による神経の圧迫や損傷が疑われる場合に、神経の回復を促す目的で手術が検討されます。</li>
+          <li>特に、発症から一定期間内（通常は早期）に行うことが、より良い回復につながる可能性があると考えられています。（ただし、手術の適切な時期や効果については、病状や原因により異なります。）</li>
+        </ul>
+        </ol>
+      </section>
+
+      <section class="section-block">
+      <h2>4\. 手術の方法</h2>
+        <ul>
+          <li><strong>具体的な手術手技:</strong></li>
+        <ol>
+          <li><strong>アプローチ:</strong> 神経の圧迫部位に応じて、手術の進入経路を選択します。</li>
+          <li><strong>経乳突経路:</strong> 耳の後ろを切開し、側頭骨（乳突蜂巣）を削って顔面神経管に到達します。主に膝神経節（神経が曲がる部分）より末梢側の減荷に適しています。</li>
+          <li><strong>顔面神経管の開放:</strong> 顔面神経が通っている骨の管を、神経を傷つけないように慎重に削り、開放します。</li>
+          <li><strong>神経鞘の切開（必要な場合）:</strong> 神経を包んでいる膜（神経鞘）が腫れて神経を締め付けていると考えられる場合、神経鞘を縦に切開して圧迫を取り除くことがあります。</li>
+          <li><strong>閉鎖:</strong> 開放した骨の部分を整え、必要に応じて筋膜などで保護します。外した頭蓋骨を戻し（中頭蓋窩経路の場合）、切開した皮膚を縫合します。耳の中にガーゼなどを詰める場合もあります。</li>
+          <li><strong>手術時間:</strong> アプローチ方法や減荷の範囲により異なりますが、通常〇～〇時間程度です。（医師にご確認ください）</li>
+        </ul>
+        </ol>
+      </section>
+
+      <section class="section-block">
+      <h2>5\. 手術によって期待される効果</h2>
+        <ul>
+          <li>顔面神経麻痺の回復促進</li>
+          <li>顔面神経麻痺の最終的な回復度の向上（ただし、効果には個人差があり、保証されるものではありません）</li>
+          <li>後遺症の軽減</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>6\. 手術に伴う危険性・合併症</h2>
+        <p>
+          手術には、以下のような危険性や合併症が起こる可能性があります。最大限の注意を払いますが、ゼロにすることはできません。
+        </p>
+        <ul>
+          <li><strong>一般的な合併症:</strong></li>
+          <li><strong>出血:</strong> 手術中や手術後に出血することがあります。頭蓋内に出血（硬膜外血腫など）が起こる可能性もあります。</li>
+          <li><strong>感染:</strong> 手術部位に細菌が感染することがあります。髄膜炎を起こす可能性もあります。</li>
+          <li><strong>痛み:</strong> 手術後に痛みが出ますが、鎮痛剤でコントロールします。</li>
+          <li><strong>傷跡:</strong> 皮膚を切開した部分に傷跡が残ります。</li>
+          <li><strong>この手術特有の合併症:</strong></li>
+          <li><strong>聴力低下（感音難聴）・聴力消失（聾）:</strong> 手術操作が内耳に影響を及ぼし、回復困難な感音難聴や、まれに完全に聞こえなくなる（聾）可能性があります。</li>
+          <li><strong>めまい:</strong> 手術操作が内耳や前庭神経に影響し、一時的または永続的にめまいが起こることがあります。</li>
+          <li><strong>耳鳴り:</strong> 手術後に耳鳴りが悪化したり、新たに出現したりすることがあります。</li>
+          <li><strong>顔面神経の直接損傷:</strong> 手術操作中に顔面神経そのものを傷つけてしまい、麻痺が改善しない、あるいは悪化する可能性があります。</li>
+          <li><strong>髄液漏:</strong> 頭蓋底や側頭骨を操作するため、脳や脊髄を包む膜（硬膜）が損傷し、脳脊髄液が漏れ出すことがあります。髄膜炎の原因となったり、再手術が必要になったりすることがあります。</li>
+          <li><strong>味覚障害:</strong> 鼓索神経（味覚の神経）が近くにあるため、影響を受ける可能性があります。</li>
+          <li><strong>麻痺の不改善・不変:</strong> 手術を行っても、期待したほどの麻痺の改善が得られない、あるいは全く変化がない可能性もあります。</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>7\. 他の治療法の選択肢</h2>
+        <ul>
+          <li><strong>薬物療法:</strong> ステロイド薬、抗ウイルス薬、ビタミン剤、血流改善薬などが、麻痺の原因や時期に応じて用いられます。多くの場合、まず薬物療法が行われます。</li>
+          <li><strong>経過観察:</strong> 軽度の麻痺の場合や、発症から時間が経過している場合など。</li>
+          <li><strong>リハビリテーション:</strong> 顔面筋のマッサージや運動療法。</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>8\. 手術後の経過と注意点</h2>
+        <ul>
+          <li><strong>入院期間:</strong> 通常〇～〇日間程度です。（医師にご確認ください）</li>
+          <li><strong>術後の安静:</strong> 特に中頭蓋窩アプローチの場合は、術後の頭蓋内圧の変動や髄液漏のリスクを考慮し、安静が必要です。</li>
+          <li><strong>術後の処置:</strong> 耳の中の詰め物（使用した場合）は、3週間程度で抜去します。</li>
+          <li><strong>聴力検査:</strong> 術後に聴力検査を行い、聴力への影響を確認します。</li>
+          <li><strong>顔面神経麻痺の評価:</strong> 定期的に麻痺の程度を評価し、回復状況を確認します。</li>
+          <li><strong>入浴・洗髪、仕事・学業・運動:</strong> 医師の指示に従ってください。</li>
+          <li><strong>定期的な通院:</strong> 退院後も、麻痺の回復経過、聴力、合併症の有無などを確認するために、定期的な通院が必要です。</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>9\. その他</h2>
+        <ul>
+          <li>手術中に予期せぬ状況（神経の走行異常、予期せぬ出血、癒着など）が発生した場合、安全を最優先し、やむを得ず手術方法を変更したり、手術範囲を縮小・拡大したり、手術を中断したりする可能性があります。</li>
+          <li>輸血が必要になる可能性は低いですが、万が一に備えて準備をすることがあります。</li>
+          <li>手術前に発熱や咳などの感冒症状がある場合、安全のため手術を延期することがあります。体調に変化がある場合は、必ず事前にお知らせください。</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>
