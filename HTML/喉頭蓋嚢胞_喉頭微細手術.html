@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-10 12:48:21
+  Meta:images: 
+-->
+  <title>患者説明資料</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">患者説明資料</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>患者説明資料</h1>
+
+
+      </section>
+
+      <section class="section-block">
+      <h2>喉頭蓋嚢胞手術 説明文書</h2>
+        <h3>1\. 病名</h3>
+        <p>
+          喉頭蓋嚢胞
+        </p>
+        <h3>2\. 予定される手術</h3>
+        <p>
+          日付：
+        </p>
+        <p>
+          入院期間：4-5日程度
+        </p>
+        <p>
+          術側：
+        </p>
+        <p>
+          全身麻酔
+        </p>
+        <h3>3\. 手術の目的</h3>
+        <p>
+          喉頭蓋にできた嚢胞を切除または開放することで、声のかすれ、喉の違和感、呼吸困難感などの症状を改善し、誤嚥のリスクを軽減します。
+        </p>
+        <h3>4\. 手術の方法</h3>
+        <p>
+          手術は「直達鏡」という器具を用いて行われます。これは、口の中から喉の奥まで挿入し、直接喉頭蓋を観察しながら手術を行う方法です。嚢胞の大きさや位置、状態に応じて、以下のいずれかの方法が選択されます。
+        </p>
+        <ul>
+          <li><strong>嚢胞壁の全摘出：</strong> 嚢胞の壁全体を丁寧に剥離し、完全に摘出します。これにより、再発のリスクを低減します。</li>
+          <li><strong>嚢胞の広範囲開放：</strong> 嚢胞の一部を切開し、内容物を排出した後、嚢胞の壁を広く開放します。これにより、嚢胞が再び液体で満たされるのを防ぎます。</li>
+        </ul>
+        <p>
+          手術は、顕微鏡や内視鏡を用いて詳細な視野を確保しながら慎重に行われます。
+        </p>
+        <h3>5\. 手術によって期待される効果</h3>
+        <p>
+          手術により、喉頭蓋嚢胞による圧迫や炎症が解消され、以下の症状の改善が期待されます。
+        </p>
+        <ul>
+          <li>声のかすれ、声が出しにくいなどの音声障害の改善</li>
+          <li>喉の異物感や違和感の解消</li>
+          <li>呼吸困難感の軽減</li>
+          <li>誤嚥（飲食物が誤って気管に入ってしまうこと）のリスクの低減</li>
+        </ul>
+        <h3>6\. 手術に伴う危険性・合併症</h3>
+        <p>
+          手術は細心の注意を払って行われますが、以下のような危険性や合併症が起こる可能性があります。
+        </p>
+        <ul>
+          <li><strong>出血：</strong> 手術中や手術後に、出血が起こることがあります。通常は自然に止まりますが、稀に止血処置が必要となる場合があります。</li>
+          <li><strong>感染：</strong> 手術部位に細菌が感染し、炎症を起こすことがあります。抗生剤の投与で対応しますが、稀に再手術が必要となる場合があります。</li>
+          <li><strong>嚥下障害：</strong> 一時的に飲み込みにくさを感じることがあります。通常は時間とともに改善しますが、稀に長引くことがあります。</li>
+          <li><strong>嗄声（声のかすれ）：</strong> 手術操作により一時的に声帯に影響が出ることがあり、声のかすれが生じることがあります。ほとんどの場合、一時的なものですが、稀に長引くことがあります。</li>
+          <li><strong>歯牙損傷・口腔内損傷：</strong> 直達鏡の挿入時に、歯や唇、舌などに損傷を与える可能性があります。</li>
+          <li><strong>再発：</strong> 嚢胞の性質や摘出範囲によっては、再発する可能性があります。</li>
+          <li><strong>瘢痕形成：</strong> 手術部位に瘢痕（きずあと）が形成され、喉の違和感や声の変化を引き起こすことがあります。</li>
+          <li><strong>喉頭浮腫：</strong> 手術後、喉頭が腫れる（浮腫）ことがあり、稀に気道の閉塞を避けるために一時的な気管切開が必要となる場合があります。</li>
+        </ul>
+        <h3>7\. 手術後の経過と注意点</h3>
+        <ul>
+          <li>手術後は、喉の痛みや違和感が生じることがあります。痛み止めで対応します。</li>
+          <li>手術の範囲や術後の状態によりますが、数日間は安静を保ち、刺激の少ない食事から開始し、徐々に通常の食事に戻していくこともあります。</li>
+          <li>術後は、声の安静が必要となる場合があります。医師の指示に従って下さい。</li>
+          <li>退院後も、定期的な外来受診で経過を観察し、必要に応じて内視鏡検査などを行います。</li>
+        </ul>
+        <h3>8\. その他</h3>
+        <ul>
+          <li>手術前に発熱や咳、その他体調不良がある場合、安全のため手術が延期されることがあります。</li>
+          <li>手術中に予期せぬ状況が発生した場合、患者さんの安全と最善の治療結果を得るために、やむを得ず手術方法を変更したり、追加の手術を行ったりする可能性があります。その際は、可能な限り速やかにご本人またはご家族にご説明いたします。</li>
+          <li>摘出した組織は、病理検査（顕微鏡で詳しく調べる検査）に提出することがあります。病理検査の結果、術前診断と確定診断が相違することがあります。</li>
+        </ul>
+        <h3>9\. 代替可能な治療法</h3>
+        <ul>
+          <li><strong>経過観察：</strong> 症状が軽度で、日常生活に支障がない場合は、定期的に経過を観察するという選択肢もあります。ただし、嚢胞が大きくなったり、症状が悪化したりする可能性があります。</li>
+          <li><strong>穿刺吸引：</strong> 嚢胞に針を刺して内容物を吸引する方法もありますが、嚢胞壁が残るため再発率が高いとされています。</li>
+        </ul>
+        <h3>10\. 手術を受けなかった場合に予想されること</h3>
+        <p>
+          手術を受けなかった場合、喉頭蓋嚢胞は自然に治癒することは稀で、多くの場合、徐々に増大するか、現状維持となります。嚢胞が大きくなると、以下のような症状が悪化する可能性があります。
+        </p>
+        <ul>
+          <li>声のかすれや声が出しにくいなどの音声障害が進行する。</li>
+          <li>喉の異物感や違和感が強くなる。</li>
+          <li>嚢胞が気道を圧迫し、呼吸困難感が増す。</li>
+          <li>飲食物が気管に入りやすくなり、誤嚥性肺炎のリスクが高まる。</li>
+          <li>稀に嚢胞内で炎症や感染を引き起こし、呼吸困難が急速に悪化することがあります。</li>
+        </ul>
+        <h3>11\. 要約</h3>
+        <p>
+          喉頭蓋嚢胞は、喉頭蓋にできる液体が貯留した袋状の病変で、声のかすれ、喉の違和感、呼吸困難感などの症状を引き起こします。本手術は、直達鏡という器具を用いて口の中から嚢胞を直接観察し、嚢胞壁を完全に摘出するか、広く開放することで症状の改善を目指します。期待される効果としては、音声障害や喉の違和感の解消、呼吸困難感の軽減、誤嚥リスクの低減などがあります。手術には出血、感染、嚥下障害、嗄声、歯牙損傷、再発、喉頭浮腫による気管切開の可能性などのリスクや合併症が伴う可能性がありますが、これらは稀であり、適切な処置により対応されます。術後は喉の痛みや違和感が生じることがありますが、安静と食事制限で徐々に回復します。手術前に体調不良がある場合や、手術中に予期せぬ状況が発生した場合は、安全のため手術方法の変更や延期となる可能性があります。摘出した組織は病理検査に提出され、術前診断との相違が生じることもあります。代替治療法としては経過観察や穿刺吸引がありますが、嚢胞が進行し症状が悪化するリスクがあります。手術を受けない場合、嚢胞は自然治癒せず、症状が悪化し、誤嚥性肺炎のリスクも高まる可能性があります。
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>

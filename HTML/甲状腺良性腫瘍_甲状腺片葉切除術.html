@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-10 12:48:21
+  Meta:images: 
+-->
+  <title>甲状腺片葉切除術　手術説明書</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">甲状腺片葉切除術　手術説明書</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>甲状腺片葉切除術　手術説明書</h1>
+
+        <h3>1\. 病名</h3>
+        <p>
+          甲状腺良性腫瘍
+        </p>
+        <h3>2\. 予定される手術</h3>
+        <ul>
+          <li><strong>手術名</strong>: 甲状腺片葉切除術</li>
+          <li><strong>日付</strong>:</li>
+          <li><strong>入院期間</strong>: 約7日</li>
+          <li><strong>術側</strong>: □ 右 / □ 左</li>
+          <li><strong>麻酔</strong>: 全身麻酔</li>
+        </ul>
+        <h3>3\. 手術の目的</h3>
+        <p>
+          甲状腺にできた良性の腫瘍を摘出することを目的とします。腫瘍を摘出することで、首の腫れや圧迫による症状（飲み込みにくさ、息苦しさなど）の改善、美容的な改善、そして摘出した組織を詳しく調べることで最終的な確定診断を行います。
+        </p>
+        <h3>4\. 手術の方法</h3>
+        <ol>
+          <li>全身麻酔をかけた後、首の前（通常は皮膚のしわに沿って）を約5～10cm切開します。</li>
+          <li>首の筋肉を左右に分け、甲状腺を露出させます。</li>
+          <li>甲状腺の周囲にある重要な組織（声を調節する反回神経など）を慎重に確認し、温存します。</li>
+          <li>腫瘍のある側の甲状腺（半葉）を、周囲の血管を処理しながら摘出します。</li>
+          <li>止血を確認し、術後の出血や浸出液を排出するための管（ドレーン）を留置します。</li>
+          <li>切開した部分を丁寧に縫合し、手術を終了します。</li>
+        </ol>
+        <h3>5\. 手術によって期待される効果</h3>
+        <ul>
+          <li>腫瘍による頸部の圧迫症状（嚥下困難、呼吸困難感、違和感など）の解消または軽減</li>
+          <li>首の腫れが改善することによる美容的な改善</li>
+          <li>腫瘍が将来的に増大することや、ごく稀に起こる悪性化への不安の解消</li>
+          <li>確定診断</li>
+        </ul>
+        <h3>6\. 手術に伴う危険性・合併症</h3>
+        <p>
+          手術は安全に十分配慮して行われますが、以下のような危険性（合併症）が起こる可能性があります。
+        </p>
+        <ul>
+          <li><strong>出血</strong>: 手術中および手術後に出血が起こる可能性があります。少量の場合は自然に止まることが多いですが、量が多い場合は、止血のための処置や再手術が必要になることがあります。また、出血量が多い場合には気道狭窄による窒息を防ぐために緊急で気管切開術が必要になる場合があります。</li>
+          <li><strong>反回神経麻痺（声のかすれ）</strong>: 声帯の動きを調節する神経（反回神経）が甲状腺のすぐ裏側を走行しているため、手術操作の影響で麻痺が生じ、声がかすれることがあります。多くは一時的なもので数週間から数ヶ月で回復しますが、ごく稀（1%程度）に永続的な麻痺が残ることがあります。</li>
+          <li><strong>上喉頭神経麻痺（高い声が出にくい）</strong>: 高い声を出すための筋肉を支配する神経（上喉頭神経）が麻痺すると、高い声が出しにくくなったり、大きな声が出しにくくなったりすることがあります。これも多くは一時的です。</li>
+          <li><strong>副甲状腺機能低下症（血液中のカルシウム濃度の低下）</strong>: 甲状腺の裏側には、血液中のカルシウム濃度を調節する副甲状腺という小さな臓器があります。手術の影響でこの臓器の血流が悪くなったり、誤って摘出されたりすると、血液中のカルシウム濃度が低下し、手足や口の周りのしびれ（テタニー症状）が出現することがあります。半切術の場合は起こる可能性は低いですが、必要に応じてカルシウム剤やビタミンDの内服治療を行います。</li>
+          <li><strong>創部感染・離開</strong>: まれに傷口に細菌が感染し、赤み、腫れ、痛み、膿が出ることがあります。その際は、抗生物質の投与や傷の洗浄などの処置を行います。</li>
+          <li><strong>ケロイド・肥厚性瘢痕</strong>: 体質により、傷跡が赤く盛り上がることがあります。</li>
+          <li><strong>その他</strong>: 気管損傷、嚥下困難、リンパ液の漏出などが起こる可能性があります。</li>
+        </ul>
+        <h3>7\. 手術後の経過と注意点</h3>
+        <ul>
+          <li><strong>ドレーン</strong>: 術後、創部に留置したドレーンは、出血や浸出液が少なくなれば2～3日程度で抜去します。</li>
+          <li><strong>食事</strong>: 翌日から水分や食事を開始できますが、最初はむせやすいことがあるため、ゆっくり摂取してください。</li>
+          <li><strong>痛み</strong>: 創部の痛みに対しては、鎮痛剤を使用します。</li>
+          <li><strong>声の状態</strong>: 術後、一時的に声がかすれたり、出しにくかったりすることがあります。</li>
+          <li><strong>活動</strong>: 術後はベッド上での安静が必要ですが、翌日からは歩行が可能です。退院後、デスクワークは可能ですが、激しい運動や重いものを持つ作業は、1ヶ月程度控えてください。</li>
+          <li><strong>入浴</strong>: 創部の状態によりますが、ドレーン抜去後から可能となるのが一般的です。</li>
+          <li><strong>甲状腺機能</strong>: 甲状腺を半分残すため、多くの場合、甲状腺ホルモンを補充する内服薬は不要です。ただし、術前の機能によっては、ホルモン剤の内服が必要になる場合があります。定期的な血液検査で確認します。</li>
+        </ul>
+        <h3>8\. その他</h3>
+        <ul>
+          <li>手術前に発熱や咳、その他体調不良がある場合、安全のため手術が延期されることがあります。</li>
+          <li>手術中に予期せぬ状況が発生した場合、患者さんの安全と最善の治療結果を得るために、やむを得ず手術方法を変更したり、追加の手術を行ったりする可能性があります。その際は、可能な限り速やかにご本人またはご家族にご説明いたします。</li>
+          <li>摘出した組織は、病理検査（顕微鏡で詳しく調べる検査）に提出します。病理検査の結果、術前診断と確定診断が相違することがあります。</li>
+        </ul>
+        <h3>9\. 代替可能な治療法</h3>
+        <ul>
+          <li><strong>経過観察</strong>: 腫瘍が小さく、症状もない場合、手術を行わずに定期的な診察（超音波検査など）で大きさの変化を見ていく方法です。</li>
+          <li><strong>穿刺吸引細胞診</strong>: 定期的に腫瘍に針を刺して細胞を採取し、悪性の変化がないかを確認する方法です。</li>
+        </ul>
+        <h3>10\. 手術を受けなかった場合に予想されること</h3>
+        <p>
+          腫瘍が徐々に大きくなり、首の圧迫感や美容的な問題が強くなる可能性があります。また、嚥下困難や呼吸困難などの症状が出現・悪化することがあります。良性腫瘍が悪性化する可能性は非常に稀ですが、完全には否定できません。
+        </p>
+        <h3>11\. 要約</h3>
+        <p>
+          このたび、「甲状腺良性腫瘍」の診断のもと、全身麻酔による「甲状腺半切術」を予定しています。この手術は、首のしわに沿って皮膚を切り、腫瘍のある側の甲状腺を摘出するものです。目的は、腫瘍による圧迫症状や見た目の問題を改善し、摘出した組織で確定診断を行うことです。手術によりこれらの効果が期待できますが、一方で合併症のリスクも伴います。特に重要なものとして、手術後の出血、声がかすれる反回神経麻痺（多くは一時的ですが、稀に永続します）、血液中のカルシウムが低下し手足がしびれる副甲状腺機能低下症（半切術では稀です）などが挙げられます。手術後は数日間の入院となり、首にたまった液体を出す管を入れ、翌日から食事や歩行を開始します。退院後もしばらくは運動制限などが必要です。手術以外の選択肢として経過観察などもありますが、手術を受けない場合は腫瘍が大きくなり症状が悪化する可能性があります。手術中の予期せぬ事態や、術前の体調不良によっては、手術の変更や延期の可能性もありますのでご了承ください。摘出した組織は病理検査で詳しく調べ、最終的な診断をいたします。
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>

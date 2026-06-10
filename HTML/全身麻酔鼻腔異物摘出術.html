@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-10 12:48:21
+  Meta:images: 
+-->
+  <title>患者説明資料</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">患者説明資料</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>患者説明資料</h1>
+
+
+      </section>
+
+      <section class="section-block">
+      <h2>鼻腔異物摘出術 手術説明書</h2>
+        <h3>1\. 病名</h3>
+        <p>
+          鼻腔異物 (びくういぶつ)
+        </p>
+        <h3>2.予定される手術</h3>
+        <ul>
+          <li><strong>日付：</strong> 2025年9月6日</li>
+          <li><strong>入院期間：</strong> 1泊2日</li>
+          <li><strong>術側：</strong> 右</li>
+          <li>全身麻酔</li>
+        </ul>
+        <h3>3\. 手術の目的</h3>
+        <p>
+          お子様の鼻の中に入ってしまった異物を取り除くために手術を行います。異物をそのままにしておくと、鼻の粘膜を傷つけたり、痛みや感染、悪臭の原因となったり、呼吸の妨げになったりすることがあります。この手術は、これらの症状を改善し、将来起こりうるより重い合併症（難治性副鼻腔炎）を防ぐことを目的としています。
+        </p>
+        <h3>4\. 手術の方法</h3>
+        <p>
+          安全のため、全身麻酔でお子様が完全に眠っている間に行います。
+          鼻の穴から、先端にカメラがついた細い管（内視鏡）や、物をつかむための小さな器具（鉗子など）を慎重に挿入します。モニターで鼻の内部を直接見ながら、異物の場所や種類を確認し、ゆっくりと取り出します。
+          皮膚を切開することはないため、お顔に傷が残ることはありません。
+        </p>
+        <h3>5\. 手術によって期待される効果</h3>
+        <ul>
+          <li>異物が取り除かれることで、鼻づまり、悪臭のある鼻水、鼻血、痛みなどの症状が改善します。</li>
+          <li>異物による感染や、粘膜が傷つくことによって起こる副鼻腔炎などの合併症を予防することができます。</li>
+          <li>安心してお鼻で呼吸できるようになります。</li>
+        </ul>
+        <h3>6\. 手術に伴う危険性・合併症</h3>
+        <p>
+          どのような手術でも、予期せぬことが起こる可能性はゼロではありません。安全には最大限配慮しますが、以下のような危険性・合併症が考えられます。
+        </p>
+        <ul>
+          <li><strong>出血：</strong> 鼻の粘膜は血管が多いため、器具の操作によって多少出血することがあります。ほとんどの場合は自然に止まるか、簡単な処置で止血できますが、稀に出血量が多くなり、再度の止血処置が必要になることがあります。</li>
+          <li><strong>鼻粘膜の損傷：</strong> 器具を挿入する際に、鼻の中の粘膜を傷つけてしまう可能性があります。通常は自然に治癒します。</li>
+          <li><strong>感染：</strong> 処置を行った部分から細菌が入り、炎症を起こす可能性があります。予防のために抗生物質を使用することがあります。</li>
+          <li><strong>異物の残存・移動：</strong> 異物がもろくて崩れやすい場合や、取り出しにくい場所にある場合、ごく一部が鼻の中に残ってしまう可能性があります。また、処置中に異物がさらに奥（のどの方）へ移動することもあり、その場合は追加の処置が必要になることがあります。</li>
+          <li><strong>鼻中隔穿孔（びちゅうかくせんこう）：</strong> 非常に稀ですが、特に異物がボタン電池や磁石などの場合は、化学反応や圧迫によって鼻の左右を隔てている壁（鼻中隔）に穴が開いてしまうことがあります。</li>
+        </ul>
+        <h3>7\. 手術後の経過と注意点</h3>
+        <ul>
+          <li><strong>安静：</strong> 手術後は鼻の安静を保つことが大切です。鼻を強くかんだり、指でいじったりしないように見守ってあげてください。</li>
+          <li><strong>出血：</strong> 術後、鼻水に少量の血が混じることがありますが、自然に止まります。もし、ポタポタと垂れるような出血が続く場合は、すぐにスタッフにお知らせください。</li>
+          <li><strong>お薬：</strong> 必要に応じて、感染予防の抗生物質や痛み止めが処方されます。医師の指示通りに飲ませてあげてください。</li>
+          <li><strong>食事・入浴：</strong> 食事や入浴については、麻酔からの覚め具合や術後の状態を見ながら、医師・看護師がご説明します。</li>
+        </ul>
+        <h3>8\. その他</h3>
+        <ul>
+          <li>手術前に発熱や咳、その他体調不良がある場合、安全のため手術が延期されることがあります。</li>
+          <li>手術中に予期せぬ状況が発生した場合、患者さんの安全と最善の治療結果を得るために、やむを得ず手術方法を変更したり、追加の手術を行ったりする可能性があります。その際は、可能な限り速やかにご本人またはご家族にご説明いたします。</li>
+          <li>摘出した組織は、病理検査（顕微鏡で詳しく調べる検査）に提出することがあります。病理検査の結果、術前診断と確定診断が相違することがあります。</li>
+        </ul>
+        <h3>9\. 代替可能な治療法</h3>
+        <ul>
+          <li><strong>外来での摘出：</strong> 意識のある状態で、外来の診察室で器具を使って取り除くことを試みる方法です。しかし、小さなお子様の場合は、恐怖心から動いてしまうことが多く、かえって鼻の中を傷つけたり、異物を奥に押し込んでしまったりする危険性が高くなります。安全かつ確実に取り除くために、全身麻酔下での手術が最も適切な方法と考えられます。</li>
+        </ul>
+        <h3>10\. 手術を受けなかった場合に予想されること</h3>
+        <p>
+          異物を鼻の中に放置した場合、以下のようなことが予想されます。
+        </p>
+        <ul>
+          <li>悪臭のする黄色や緑色の鼻水が片方の鼻からだけ出続ける。</li>
+          <li>鼻づまりや鼻血を繰り返す。</li>
+          <li>異物の周りで細菌が繁殖し、慢性的な感染（副鼻腔炎など）を起こす。</li>
+          <li>異物の刺激で粘膜が盛り上がり（肉芽形成）、摘出がより困難になる。</li>
+          <li><strong>（特に危険な異物の場合）</strong> ボタン電池は化学やけど、磁石は圧迫により、鼻の内部の組織を短時間で破壊し、鼻中隔に穴が開く（鼻中隔穿孔）などの重大な後遺症を残す危険があります。</li>
+          <li>異物がのどに落ちて、気管に入り込み、窒息を起こす危険性もわずかながらあります。</li>
+        </ul>
+        <h3>11\. 要約</h3>
+        <p>
+          この手術は、お子様の鼻の穴に入ってしまった異物を取り除くためのものです。
+        </p>
+        <p>
+          お子様がぐっすり眠っている間に全身麻酔をかけ、安全に手術を行います。鼻の穴から内視鏡（小さなカメラ）や専用の器具を入れ、鼻の内部を直接見ながら慎重に異物を摘出します。お顔に傷がつくことはありません。
+        </p>
+        <p>
+          この手術により、鼻づまりや悪臭のある鼻水といった症状が改善され、異物を放置することによる感染や鼻の粘膜へのダメージといった、より深刻な問題を防ぐことができます。
+        </p>
+        <p>
+          手術には、出血や感染、鼻の粘膜を傷つけるなどの可能性がわずかながら伴いますが、安全には細心の注意を払います。特にボタン電池や磁石などは、放置すると鼻の内部に穴を開けるなど重篤な合併症を引き起こす危険があるため、早期の摘出が重要です。
+        </p>
+        <p>
+          手術後は、鼻を強くかんだりいじったりせず、安静に過ごすことが大切です。鼻水に少量の血が混じることもありますが、自然に治まります。もし出血が多いなど、何かご心配なことがあればすぐにスタッフにお知らせください。
+        </p>
+        <p>
+          ご不明な点があれば、遠慮なく医師や看護師にご質問ください。
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>

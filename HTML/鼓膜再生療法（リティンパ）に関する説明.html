@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+  Meta:reviewed_by: 
+  Meta:review_date: 
+  Meta:evidence_source: 
+  Meta:change_reason: 
+  Meta:version: 
+  Meta:build_datetime: 2026-06-10 12:48:21
+  Meta:images: 
+-->
+  <title>鼓膜穿孔に対する鼓膜再生療法(リティンパ®)に関する説明文書</title>
+  <style id="screen-css">
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --warning: #9f580a;
+      --warning-bg: #fff7e6;
+      --urgent: #b42318;
+      --urgent-bg: #fff1f0;
+      --paper: #ffffff;
+      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef3f7;
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+    .app-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar-title { font-weight: 700; color: var(--accent-strong); white-space: nowrap; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .slide-pagination { display: none; }
+    .document { width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }
+    article {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
+    }
+    .section-block { padding: 28px 34px; border-bottom: 1px solid var(--line); }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover {
+      padding-top: 42px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }
+    h1, h2, h3 { margin: 0; line-height: 1.35; }
+    h1 { max-width: 820px; font-size: 34px; }
+    h2 { margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 16px; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 7px 0; }
+    a { color: var(--accent-strong); }
+    .lead { max-width: 780px; margin-top: 18px; font-size: 19px; }
+    .note {
+      padding: 14px 16px;
+      border-left: 5px solid var(--warning);
+      background: var(--warning-bg);
+      margin-bottom: 16px;
+    }
+    .step-list, .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-list section, .risk-grid section {
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .check-list { list-style: none; padding-left: 0; }
+    .check-list li { position: relative; padding-left: 30px; }
+    .check-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.58em;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      background: #ffffff;
+    }
+    .urgent { border-left: 7px solid var(--urgent); background: var(--urgent-bg); }
+    .urgent h2 { border-left-color: var(--urgent); }
+    
+    @media (max-width: 760px) {
+      body { font-size: 16px; }
+      .app-toolbar { position: static; align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .document { padding: 0; }
+      article { border: 0; box-shadow: none; }
+      .section-block { padding: 24px 18px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 21px; }
+      .step-list, .risk-grid { grid-template-columns: 1fr; }
+    }
+    @media print { .app-toolbar, .slide-pagination { display: none; } }
+  </style>
+  <style id="print-large-css" media="print">
+    @page { size: A4; margin: 14mm 14mm 16mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 14.5pt; line-height: 1.48;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }
+    h1 { margin: 0 0 6mm; font-size: 24pt; }
+    h2 { margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }
+    h3 { margin: 0 0 2mm; font-size: 15pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 4mm; }
+    ul, ol { padding-left: 1.35em; }
+    li { margin: 1.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 15.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      border: 1.2pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: block; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
+      border: 1pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.35em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="print-compact-css" media="not all">
+    @page { size: A4; margin: 10mm 10mm 11mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10.8pt; line-height: 1.28;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }
+    h1 { margin: 0 0 3mm; font-size: 18pt; }
+    h2 { margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }
+    h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 2.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.8mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 11.5pt; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      border: 0.8pt solid #444444; background: #ffffff !important;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+  </style>
+  <style id="slides-css" media="not all">
+    body[data-mode="slides"] { overflow: hidden; background: #0f172a; }
+    body[data-mode="slides"] .app-toolbar {
+      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+    body[data-mode="slides"] .toolbar-title { color: #ccfbf1; }
+    body[data-mode="slides"] button {
+      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+    }
+    body[data-mode="slides"] button[aria-pressed="true"] { background: #14b8a6; color: #062926; }
+    body[data-mode="slides"] .document {
+      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
+      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+    }
+    body[data-mode="slides"] article {
+      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
+    }
+    body[data-mode="slides"] .section-block {
+      display: flex; flex-direction: column; justify-content: center;
+      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
+      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+    }
+    body[data-mode="slides"] .doc-cover { background: #ecfeff; }
+    body[data-mode="slides"] h1 { max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }
+    body[data-mode="slides"] h2 {
+      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+    }
+    body[data-mode="slides"] h3 { font-size: clamp(20px, 2vw, 28px); }
+    body[data-mode="slides"] p, body[data-mode="slides"] li {
+      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    }
+    body[data-mode="slides"] .lead { font-size: clamp(24px, 2.5vw, 34px); }
+    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+    }
+    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
+    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {
+      background: #ffffff; border-color: #cbd5e1;
+    }
+    .slide-pagination { display: none; }
+    body[data-mode="slides"] .slide-pagination {
+      position: fixed; right: 22px; bottom: 18px; z-index: 20;
+      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
+      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+    }
+    body[data-mode="slides"] .slide-nav {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; min-height: 34px; padding: 0;
+      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+    }
+    @media print { .slide-pagination { display: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="app-toolbar" aria-label="表示切り替え">
+    <div class="toolbar-title">鼓膜穿孔に対する鼓膜再生療法(リティンパ®)に関する説明文書</div>
+    <div class="toolbar-actions">
+      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
+      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
+      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
+      <button type="button" data-action="print">印刷/PDF</button>
+    </div>
+  </header>
+
+  <main class="document" id="top">
+    <article>
+      <section class="doc-cover section-block">
+        <p class="eyebrow">患者さん・ご家族への説明資料</p>
+        <h1>鼓膜穿孔に対する鼓膜再生療法(リティンパ®)に関する説明文書</h1>
+
+
+      </section>
+
+      <section class="section-block">
+      <h2>1\. 鼓膜穿孔について</h2>
+        <p>
+          鼓膜は、耳の奥にある薄い膜で、音を振動として伝える役割と、中耳を外部の細菌などから守る役割を担っています。鼓膜穿孔とは、中耳炎や外傷（耳かき、平手打ち、気圧の変化など）によって、この鼓膜に穴が開いてしまった状態を指します。
+          鼓膜に穴が開くと、難聴（音が聞こえにくい）、耳鳴り、耳だれ（耳漏）、めまいなどの症状が現れることがあります。また、穴から細菌が入りやすくなり、中耳炎を繰り返す原因にもなります。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>2\. リティンパ®を用いた鼓膜再生療法について</h2>
+        <h3>治療の目的</h3>
+        <p>
+          この治療は、穿孔した鼓膜を再生させ、穴を閉鎖することを目的とします。これにより、聴力の改善、耳だれの停止、中耳炎の再発予防などが期待されます。
+        </p>
+        <h3>治療の方法（リティンパ®）</h3>
+        <p>
+          リティンパ®を用いた鼓膜再生療法は、主に以下の手順で行われます。
+        </p>
+        <ol>
+          <li><strong>麻酔:</strong> 耳の中に局所麻酔を行います。</li>
+          <li><strong>穿孔縁の新鮮化:</strong> 鼓膜の穴の縁にある古い組織を、治癒を促すために針やメスで少量除去します。</li>
+          <li><strong>リティンパ®の準備と設置:</strong></li>
+        <ul>
+          <li>「リティンパ®鼓膜再生用液」（トラフェルミン：bFGF製剤）を、「リティンパ®鼓膜再生用スポンジ」（アテロコラーゲンスポンジ）に染み込ませます。</li>
+          <li>薬剤が染み込んだスポンジを、鼓膜の穿孔部を覆うように慎重に設置します。これが鼓膜細胞が増殖するための「足場」となり、bFGFが細胞増殖を強力に促します。</li>
+          <li><strong>固定・保護:</strong> 設置したスポンジがずれないように、フィブリン糊という接着剤のようなもので固定します。</li>
+        </ul>
+        </ol>
+        <p>
+          この治療は、通常、外来で局所麻酔下に行われ、手術時間は比較的短時間（30分〜1時間程度）です。
+          複数回の施行が可能であり、穿孔の状態によっては複数回の処置を行うことで、最終的な鼓膜穿孔閉鎖率は、従来の鼓膜形成術と比較しても遜色のない結果が報告されています。
+        </p>
+        <h3>この治療の対象となる方</h3>
+        <ul>
+          <li>鼓膜穿孔があり、自然治癒が期待できない方（鼓膜穿孔後6ヶ月経過）</li>
+          <li>従来の鼓膜形成術（自分の組織を移植する方法）を希望されない、または適用が難しい方</li>
+        </ul>
+        <p>
+          などが対象となる場合があります。ただし、穿孔の大きさや位置、感染の有無、耳の手術歴、穿孔の受傷原因、中耳の状態などによっては、この治療が適さない場合もあります。特に、感染が活動的な場合や、中耳に他の病変がある場合は、この治療の前にそちらの治療が必要になることがあります。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>3\. 期待される効果（メリット）</h2>
+        <ul>
+          <li><strong>聴力の改善:</strong> 鼓膜の穴が閉じることで、音の伝わりが改善し、聴力が向上する可能性があります。</li>
+          <li><strong>耳だれの停止・感染予防:</strong> 鼓膜の穴が閉じると、外部からの細菌の侵入を防ぎ、耳だれが止まったり、中耳炎の再発を予防したりする効果が期待できます。</li>
+          <li><strong>身体への負担が少ない:</strong> 従来の鼓膜形成術と比較して、局所麻酔・外来での治療が可能であり、手術時間も短く、体への負担が少ないとされています。耳の後ろなどを切開する必要がありません。複数回の治療が必要な場合でも、入院せずに外来で対応できる利点があります。</li>
+        </ul>
+      </section>
+
+      <section class="section-block">
+      <h2>4\. 考えられるリスク、合併症、副作用（デメリット）</h2>
+        <p>
+          どのような治療にも、予期せぬリスクや合併症の可能性があります。リティンパ®を用いた治療においても、以下のようなことが起こる可能性があります。
+        </p>
+        <ul>
+          <li><strong>穿孔が閉じない、再穿孔:</strong> 1回の治療で必ずしも鼓膜の穴が完全に閉じるとは限りません。閉鎖しない場合や、一度閉じても再び穴が開いてしまう可能性があります。穿孔の大きさや状態によっては、複数回の処置が必要になることや、従来の鼓膜形成術への移行が必要になることもあります。</li>
+          <li><strong>感染:</strong> 処置後に、耳の中で感染を起こす可能性があります。</li>
+          <li><strong>聴力低下:</strong> まれに、治療前より聴力が低下する可能性があります。</li>
+          <li><strong>めまい、耳鳴り:</strong> 一時的に、またはまれに持続的に、めまいや耳鳴りが起こることがあります。</li>
+          <li><strong>味覚の変化:</strong> 鼓膜の近くには味覚に関わる神経が通っており、処置の影響で一時的に味覚が変わることがあります。</li>
+          <li><strong>薬剤（bFGF製剤）や材料（アテロコラーゲン、フィブリン糊）に対するアレルギー・副作用:</strong> 使用する薬剤や材料に対してアレルギー反応（発赤、腫れ、かゆみなど）や予期せぬ副作用が起こる可能性はゼロではありません。</li>
+        </ul>
+        <p>
+          これらのリスクや合併症の発生頻度は高くありませんが、可能性としてご理解いただく必要があります。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>5\. 代替となる治療法</h2>
+        <p>
+          鼓膜穿孔に対する治療法は、リティンパ®を用いた鼓膜再生療法の他にもいくつかあります。
+        </p>
+        <ul>
+          <li><strong>経過観察:</strong> 穿孔がごく小さい場合や、自然に閉鎖する可能性がある場合は、特別な治療を行わずに様子を見ることがあります。</li>
+          <li><strong>鼓膜形成術・鼓室形成術:</strong> 患者様自身の組織（耳の後ろの筋膜や軟骨膜など）を採取し、鼓膜の穴を塞ぐ手術です。一般的に、1回の手術での閉鎖率はリティンパ®を用いた治療よりも高い傾向にありますが、入院や全身麻酔が必要になる場合が多く、耳の後ろなどを切開する必要があります。</li>
+        </ul>
+        <p>
+          どの治療法が最適かは、患者様の状態（穿孔の大きさ、位置、原因、聴力の状態、年齢、全身状態など）によって異なります。
+        </p>
+      </section>
+
+      <section class="section-block">
+      <h2>6\. 治療後の注意点</h2>
+        <ul>
+          <li><strong>耳を濡らさない:</strong> 治療後、鼓膜が安定するまでの一定期間（通常数週間〜数ヶ月）、耳に水が入らないように注意が必要です（シャワー、洗髪など）。イヤーキャップを使用するなどの対策が必要です。</li>
+          <li><strong>鼻を強くかまない:</strong> 鼻を強くかむと、耳に圧力がかかり、再生中の鼓膜に影響を与える可能性があります。</li>
+          <li><strong>激しい運動、気圧の変化:</strong> 治療後しばらくは、激しい運動や飛行機への搭乗など、気圧が大きく変動する状況は避けるようしてください。</li>
+          <li><strong>定期的な通院:</strong> 治療後も、鼓膜の状態（再生の進行具合、感染の有無など）を確認するために、定期的な通院が必要です。</li>
+          <li><strong>治療後の耳だれについて:</strong> 治療後に耳だれが見られることがありますが、これは必ずしも感染を意味するものではありません。感染の兆候（痛み、発熱、膿性の耳だれなど）がなければ、特別な処置や投薬が不要な場合もあります。ただし、ご自身で判断せず、気になる場合は必ず医師にご相談ください。</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
+    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
+    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
+    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
+  </div>
+
+  <script>
+    const printLarge = document.getElementById("print-large-css");
+    const printCompact = document.getElementById("print-compact-css");
+    const slides = document.getElementById("slides-css");
+    const buttons = document.querySelectorAll("[data-mode]");
+    const documentFrame = document.querySelector(".document");
+    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
+    const currentSlide = document.getElementById("current-slide");
+    const totalSlides = document.getElementById("total-slides");
+    let activeSlideIndex = 0;
+
+    function setMode(mode) {
+      document.body.dataset.mode = mode;
+      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
+      printCompact.media = mode === "compact" ? "print" : "not all";
+      slides.media = mode === "slides" ? "screen" : "not all";
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      if (mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    }
+
+    function updatePagination(index) {
+      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
+      currentSlide.textContent = String(activeSlideIndex + 1);
+      totalSlides.textContent = String(slideBlocks.length);
+    }
+
+    function goToSlide(index) {
+      updatePagination(index);
+      documentFrame.scrollTo({
+        left: activeSlideIndex * documentFrame.clientWidth,
+        behavior: "smooth"
+      });
+    }
+
+    function syncPaginationFromScroll() {
+      if (document.body.dataset.mode !== "slides") return;
+      const width = Math.max(1, documentFrame.clientWidth);
+      updatePagination(Math.round(documentFrame.scrollLeft / width));
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex - 1);
+    });
+
+    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {
+      goToSlide(activeSlideIndex + 1);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (document.body.dataset.mode !== "slides") return;
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex + 1);
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        goToSlide(activeSlideIndex - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        goToSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        goToSlide(slideBlocks.length - 1);
+      }
+    });
+
+    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
+    window.addEventListener("resize", () => {
+      if (document.body.dataset.mode === "slides") {
+        goToSlide(activeSlideIndex);
+      }
+    });
+
+    document.querySelector("[data-action='print']").addEventListener("click", () => {
+      window.print();
+    });
+
+    updatePagination(0);
+    setMode("screen");
+  </script>
+</body>
+</html>
