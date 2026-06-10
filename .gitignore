@@ -20,3 +20,7 @@ Thumbs.db
 # IDE settings
 .vscode/
 .idea/
+
+# Project specific build outputs
+HTML/
+
