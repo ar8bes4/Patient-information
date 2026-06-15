@@ -3,6 +3,8 @@
 import os
 import re
 import glob
+import argparse
+import html
 
 # パス設定
 base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
@@ -132,6 +134,47 @@ html_template = """<!doctype html>
     }}
     .urgent {{ border-left: 7px solid var(--urgent); background: var(--urgent-bg); }}
     .urgent h2 {{ border-left-color: var(--urgent); }}
+    .print-consent {{ display: none; }}
+    .section-layout {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 220px;
+      gap: 24px;
+      align-items: start;
+    }}
+    .section-text {{ min-width: 0; }}
+    .section-visual {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+      border: 1px solid #cfe5e2;
+      background: #f7fbfa;
+      padding: 16px;
+    }}
+    .section-visual svg {{
+      width: 100%;
+      max-width: 180px;
+      height: auto;
+    }}
+    .section-visual figure {{
+      width: 100%;
+      margin: 0;
+    }}
+    .section-visual img {{
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      margin: 0 auto;
+    }}
+    .section-visual figcaption {{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+    }}
+    .slide-summary {{ display: none; }}
     
     @media (max-width: 760px) {{
       body {{ font-size: 16px; }}
@@ -143,6 +186,8 @@ html_template = """<!doctype html>
       h1 {{ font-size: 28px; }}
       h2 {{ font-size: 21px; }}
       .step-list, .risk-grid {{ grid-template-columns: 1fr; }}
+      .section-layout {{ grid-template-columns: 1fr; }}
+      .section-visual {{ min-height: 140px; }}
     }}
     @media print {{ .app-toolbar, .slide-pagination {{ display: none; }} }}
   </style>
@@ -153,21 +198,38 @@ html_template = """<!doctype html>
       margin: 0; padding: 0;
       background: #ffffff !important; color: #111111;
       font-family: var(--font);
-      font-size: 14.5pt; line-height: 1.48;
+      font-size: 16pt; line-height: 1.55;
     }}
     .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
+    .print-consent {{ display: block; break-after: page; page-break-after: always; padding: 0 0 7mm; }}
+    .print-consent h1 {{ margin: 0 0 5mm; font-size: 24pt; text-align: center; }}
+    .consent-meta-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin: 0 0 5mm; }}
+    .consent-field {{ min-height: 12mm; padding: 2.5mm; border: 1pt solid #333333; }}
+    .consent-label {{ display: block; margin-bottom: 1mm; font-size: 10.5pt; font-weight: 700; }}
+    .consent-summary {{ margin: 0 0 5mm; padding: 3mm; border: 1pt solid #333333; }}
+    .consent-summary h2 {{ margin: 0 0 2mm; padding: 0; border: 0; font-size: 15pt; }}
+    .consent-summary ul {{ margin-bottom: 0; }}
+    .signature-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 5mm; }}
+    .signature-box {{ min-height: 28mm; padding: 3mm; border: 1pt solid #333333; }}
+    .signature-line {{ margin-top: 8mm; border-bottom: 1pt solid #333333; height: 8mm; }}
+    .print-note {{ margin-top: 4mm; font-size: 10.5pt; }}
     .section-block {{ break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }}
     .doc-cover {{ padding-top: 0; background: #ffffff; }}
     .eyebrow {{ margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }}
     h1, h2, h3 {{ break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }}
-    h1 {{ margin: 0 0 6mm; font-size: 24pt; }}
-    h2 {{ margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 18pt; }}
-    h3 {{ margin: 0 0 2mm; font-size: 15pt; }}
+    h1 {{ margin: 0 0 6mm; font-size: 27pt; }}
+    h2 {{ margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 20pt; }}
+    h3 {{ margin: 0 0 2mm; font-size: 16pt; }}
     p, ul, ol, dl {{ margin-top: 0; margin-bottom: 4mm; }}
     ul, ol {{ padding-left: 1.35em; }}
     li {{ margin: 1.5mm 0; }}
     a {{ color: #111111; text-decoration: none; }}
-    .lead {{ font-size: 15.5pt; }}
+    .lead {{ font-size: 17pt; }}
+    .section-layout {{ display: grid; grid-template-columns: minmax(0, 1fr) 38mm; gap: 7mm; }}
+    .section-visual {{ min-height: 32mm; padding: 2mm; border: 0.8pt solid #999999; background: #ffffff !important; }}
+    .section-visual svg {{ max-width: 34mm; }}
+    .section-visual img {{ max-width: 42mm; }}
+    .section-visual figcaption {{ font-size: 8.5pt; }}
     .note, .urgent {{
       break-inside: avoid; page-break-inside: avoid; padding: 3mm;
       border: 1.2pt solid #333333; background: #ffffff !important;
@@ -191,6 +253,18 @@ html_template = """<!doctype html>
       font-size: 10.8pt; line-height: 1.28;
     }}
     .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
+    .print-consent {{ display: block; break-after: page; page-break-after: always; padding: 0 0 4mm; }}
+    .print-consent h1 {{ margin: 0 0 3mm; font-size: 17pt; text-align: center; }}
+    .consent-meta-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin: 0 0 3mm; }}
+    .consent-field {{ min-height: 9mm; padding: 1.8mm; border: 0.8pt solid #333333; }}
+    .consent-label {{ display: block; margin-bottom: 0.8mm; font-size: 8.5pt; font-weight: 700; }}
+    .consent-summary {{ margin: 0 0 3mm; padding: 2mm; border: 0.8pt solid #333333; }}
+    .consent-summary h2 {{ margin: 0 0 1mm; padding: 0; border: 0; font-size: 11.5pt; }}
+    .consent-summary ul {{ margin-bottom: 0; }}
+    .signature-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 3mm; }}
+    .signature-box {{ min-height: 20mm; padding: 2mm; border: 0.8pt solid #333333; }}
+    .signature-line {{ margin-top: 5mm; border-bottom: 0.8pt solid #333333; height: 6mm; }}
+    .print-note {{ margin-top: 2mm; font-size: 8.5pt; }}
     .section-block {{ break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }}
     .doc-cover {{ padding-top: 0; background: #ffffff; }}
     .eyebrow {{ margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }}
@@ -238,11 +312,29 @@ html_template = """<!doctype html>
       width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
       overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
     }}
+    body[data-mode="slides"] .section-layout {{
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 34vw);
+      gap: clamp(24px, 5vw, 72px);
+      align-items: center;
+      min-height: 62vh;
+    }}
+    body[data-mode="slides"] .section-visual {{
+      min-height: min(44vh, 360px);
+      border: 0;
+      background: #f0fdfa;
+      padding: clamp(18px, 3vw, 32px);
+    }}
+    body[data-mode="slides"] .section-visual svg {{ max-width: 320px; }}
+    body[data-mode="slides"] .section-visual img {{ max-width: min(520px, 100%); }}
+    body[data-mode="slides"] .section-visual figcaption {{ font-size: clamp(14px, 1.2vw, 18px); }}
     body[data-mode="slides"] .doc-cover {{ background: #ecfeff; }}
+    body[data-mode="slides"] .print-consent {{ display: none !important; }}
     body[data-mode="slides"] h1 {{ max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }}
     body[data-mode="slides"] h2 {{
       margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
     }}
+    body[data-mode="slides"] .section-block.has-slide-summary .section-text > :not(h2):not(.slide-summary) {{ display: none; }}
+    body[data-mode="slides"] .slide-summary {{ display: block; }}
     body[data-mode="slides"] h3 {{ font-size: clamp(20px, 2vw, 28px); }}
     body[data-mode="slides"] p, body[data-mode="slides"] li {{
       max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
@@ -285,6 +377,7 @@ html_template = """<!doctype html>
 
   <main class="document" id="top">
     <article>
+{print_consent}
 {content}
     </article>
   </main>
@@ -403,7 +496,12 @@ def parse_markdown_to_sections(md_text):
         "review_date": "",
         "evidence_source": "",
         "change_reason": "",
-        "version": ""
+        "version": "",
+        "diagnosis": "",
+        "procedure_name": "",
+        "anesthesia": "",
+        "laterality": "",
+        "document_type": ""
     }
     
     if len(lines) > 0 and lines[0].strip() == "---":
@@ -434,7 +532,7 @@ def parse_markdown_to_sections(md_text):
 
     # 画像リストの抽出
     image_paths = re.findall(r"!\[.*?\]\((.*?)\)", md_text)
-    metadata["images"] = image_paths
+    metadata["images"] = ", ".join(image_paths)
     metadata["build_datetime"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     body_lines = lines[start_idx:]
@@ -442,11 +540,12 @@ def parse_markdown_to_sections(md_text):
     # 2. 最初にあるH1 (# タイトル) を抽出し、フロントマターにタイトルがない場合はそれをタイトルにする
     content_lines = []
     for line in body_lines:
-        if (line.startswith("# ") or line.startswith("# **")) and title == "患者説明資料":
-            # タイトル行を抽出
-            raw_title = line.replace("#", "").replace("**", "").strip()
-            if raw_title:
-                title = raw_title
+        if line.startswith("# ") or line.startswith("# **"):
+            # H1は表紙タイトルとして扱い、本文には重複表示しない
+            if title == "患者説明資料":
+                raw_title = line.replace("#", "").replace("**", "").strip()
+                if raw_title:
+                    title = raw_title
             continue
         content_lines.append(line)
         
@@ -454,6 +553,8 @@ def parse_markdown_to_sections(md_text):
     sections = []
     current_section_content = []
     current_section_title = ""
+    current_section_visual_key = ""
+    current_section_slide_summary = ""
     is_cover = True # 最初のH2に到達するまではカバーセクション
     
     # リスト状態管理
@@ -500,6 +601,8 @@ def parse_markdown_to_sections(md_text):
                 sections.append({
                     "is_cover": True,
                     "title": title,
+                    "visual_key": "cover",
+                    "slide_summary": current_section_slide_summary,
                     "content": "\n".join(current_section_content)
                 })
                 is_cover = False
@@ -508,13 +611,27 @@ def parse_markdown_to_sections(md_text):
                 sections.append({
                     "is_cover": False,
                     "title": current_section_title,
+                    "visual_key": current_section_visual_key,
+                    "slide_summary": current_section_slide_summary,
                     "content": "\n".join(current_section_content)
                 })
             
             # 新しいセクションをスタート
             current_section_content = []
             current_section_title = h2_text
+            current_section_visual_key = ""
+            current_section_slide_summary = ""
             current_section_content.append(f"      <h2>{h2_text}</h2>")
+            continue
+
+        visual_match = re.match(r"^\{\{visual:\s*([a-zA-Z0-9_-]+)\s*\}\}$", cleaned_line)
+        if visual_match:
+            current_section_visual_key = visual_match.group(1)
+            continue
+
+        slide_summary_match = re.match(r"^\{\{slide_summary:\s*(.*?)\s*\}\}$", cleaned_line)
+        if slide_summary_match:
+            current_section_slide_summary = format_inline_elements(slide_summary_match.group(1).strip())
             continue
             
         # 空行
@@ -623,12 +740,16 @@ def parse_markdown_to_sections(md_text):
         sections.append({
             "is_cover": True,
             "title": title,
+            "visual_key": "cover",
+            "slide_summary": current_section_slide_summary,
             "content": "\n".join(current_section_content)
         })
     else:
         sections.append({
             "is_cover": False,
             "title": current_section_title,
+            "visual_key": current_section_visual_key,
+            "slide_summary": current_section_slide_summary,
             "content": "\n".join(current_section_content)
         })
         
@@ -644,32 +765,268 @@ def format_inline_elements(text):
     text = text.replace("~", "<br>")
     return text
 
+def section_visual_svg(visual_key):
+    """Markdownで指定された図版キーに対応する説明用模式図を返す。"""
+    visuals = {
+        "cover": """<svg viewBox="0 0 360 260" role="img" aria-label="耳の構造と真珠腫説明資料の表紙図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <path d="M42 148c28-68 84-104 158-94 62 8 101 49 110 113" fill="none" stroke="#bfdbfe" stroke-width="22" stroke-linecap="round"/>
+  <path d="M92 156c44-28 93-32 144-10" fill="none" stroke="#94a3b8" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="223" cy="116" r="32" fill="#fde68a" stroke="#d97706" stroke-width="6"/>
+  <text x="223" y="121" text-anchor="middle" font-size="15" fill="#78350f">真珠腫</text>
+  <text x="180" y="226" text-anchor="middle" font-size="18" fill="#0f766e">耳の奥を見ながら説明します</text>
+</svg>""",
+        "cholesteatoma-growth": """<svg viewBox="0 0 360 260" role="img" aria-label="鼓膜のへこみから真珠腫が耳小骨へ広がる図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <text x="38" y="34" font-size="16" fill="#0f766e">外耳道</text>
+  <text x="167" y="34" font-size="16" fill="#0f766e">鼓膜</text>
+  <text x="258" y="34" font-size="16" fill="#0f766e">中耳</text>
+  <path d="M34 132h104" stroke="#93c5fd" stroke-width="34" stroke-linecap="round"/>
+  <path d="M152 72c28 36 28 82 0 118" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round"/>
+  <path d="M159 96c30 18 50 28 77 28" fill="none" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="235" cy="124" r="31" fill="#fde68a" stroke="#d97706" stroke-width="6"/>
+  <path d="M247 116c31-11 51-8 68 9" fill="none" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/>
+  <text x="236" y="130" text-anchor="middle" font-size="14" fill="#78350f">真珠腫</text>
+  <text x="278" y="160" text-anchor="middle" font-size="15" fill="#dc2626">骨を溶かす</text>
+</svg>""",
+        "surgery-purpose": """<svg viewBox="0 0 360 260" role="img" aria-label="真珠腫を取り除き合併症を防ぐ図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <circle cx="112" cy="122" r="45" fill="#fde68a" stroke="#d97706" stroke-width="6"/>
+  <text x="112" y="127" text-anchor="middle" font-size="16" fill="#78350f">真珠腫</text>
+  <path d="M168 122h58" stroke="#0f766e" stroke-width="9" stroke-linecap="round"/>
+  <path d="M211 99l26 23-26 23" fill="none" stroke="#0f766e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="248" y="77" width="68" height="90" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="6"/>
+  <path d="M266 124l14 14 26-36" fill="none" stroke="#16a34a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="180" y="215" text-anchor="middle" font-size="18" fill="#0f766e">取り除いて進行を止める</text>
+</svg>""",
+        "surgical-approaches": """<svg viewBox="0 0 360 260" role="img" aria-label="真珠腫の広がりに応じた術式選択図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <g font-size="13" fill="#0f172a" text-anchor="middle">
+    <rect x="22" y="56" width="72" height="104" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="4"/>
+    <text x="58" y="48">浅い</text><path d="M40 118h36" stroke="#2563eb" stroke-width="9" stroke-linecap="round"/>
+    <rect x="106" y="56" width="72" height="104" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="4"/>
+    <text x="142" y="48">奥へ</text><path d="M124 118h36" stroke="#0891b2" stroke-width="9" stroke-linecap="round"/><circle cx="158" cy="112" r="13" fill="#fde68a" stroke="#d97706" stroke-width="4"/>
+    <rect x="190" y="56" width="72" height="104" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="4"/>
+    <text x="226" y="48">壁を再建</text><path d="M204 118h44" stroke="#16a34a" stroke-width="9" stroke-linecap="round"/><path d="M226 82v70" stroke="#64748b" stroke-width="5"/>
+    <rect x="274" y="56" width="72" height="104" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="4"/>
+    <text x="310" y="48">開放型</text><path d="M288 118h44" stroke="#ea580c" stroke-width="9" stroke-linecap="round"/><path d="M314 84c17 26 17 53 0 79" fill="none" stroke="#ea580c" stroke-width="5"/>
+  </g>
+  <text x="180" y="215" text-anchor="middle" font-size="17" fill="#0f766e">広がりで安全な方法を選ぶ</text>
+</svg>""",
+        "reconstruction": """<svg viewBox="0 0 360 260" role="img" aria-label="鼓膜と耳小骨を軟骨や筋膜で再建する図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <path d="M70 132h92" stroke="#93c5fd" stroke-width="30" stroke-linecap="round"/>
+  <path d="M174 76c30 35 30 78 0 113" fill="none" stroke="#2563eb" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="210" cy="125" r="14" fill="#cbd5e1" stroke="#64748b" stroke-width="5"/>
+  <circle cx="246" cy="125" r="14" fill="#cbd5e1" stroke="#64748b" stroke-width="5"/>
+  <path d="M211 125h35" stroke="#64748b" stroke-width="6"/>
+  <path d="M159 111l47-22 14 26-48 22z" fill="#bbf7d0" stroke="#16a34a" stroke-width="5"/>
+  <text x="192" y="79" text-anchor="middle" font-size="14" fill="#166534">軟骨・筋膜</text>
+  <text x="232" y="160" text-anchor="middle" font-size="14" fill="#475569">耳小骨</text>
+  <text x="180" y="215" text-anchor="middle" font-size="17" fill="#0f766e">必要なら聞こえの道を作り直す</text>
+</svg>""",
+        "recurrence-types": """<svg viewBox="0 0 360 260" role="img" aria-label="遺残と再形成の2種類の再発を示す図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <rect x="28" y="54" width="138" height="124" rx="14" fill="#fefce8" stroke="#ca8a04" stroke-width="5"/>
+  <text x="97" y="82" text-anchor="middle" font-size="18" fill="#854d0e">遺残</text>
+  <circle cx="97" cy="121" r="10" fill="#fde68a" stroke="#d97706" stroke-width="5"/>
+  <path d="M97 137c0 18 0 28 0 42" stroke="#d97706" stroke-width="5" stroke-dasharray="6 6"/>
+  <rect x="194" y="54" width="138" height="124" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="5"/>
+  <text x="263" y="82" text-anchor="middle" font-size="18" fill="#1d4ed8">再形成</text>
+  <path d="M232 109c25 4 46 2 65-8" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+  <path d="M267 104c-18 18-23 37-13 57" fill="none" stroke="#d97706" stroke-width="7" stroke-linecap="round"/>
+  <text x="180" y="220" text-anchor="middle" font-size="17" fill="#0f766e">種類が違うため長期通院が必要</text>
+</svg>""",
+        "sniffing-pressure": """<svg viewBox="0 0 360 260" role="img" aria-label="鼻すすりで鼓膜が内側へ引き込まれる図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <text x="84" y="56" text-anchor="middle" font-size="15" fill="#0f766e">鼻すすり</text>
+  <path d="M95 78c45 0 72 19 94 54" fill="none" stroke="#0284c7" stroke-width="8" stroke-linecap="round" stroke-dasharray="8 8"/>
+  <path d="M181 111l12 26-29-2" fill="#0284c7"/>
+  <path d="M215 72c31 40 31 82 0 122" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round"/>
+  <path d="M214 96c-32 17-45 40-40 69" fill="none" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/>
+  <text x="255" y="132" font-size="15" fill="#dc2626">鼓膜がへこむ</text>
+  <text x="180" y="220" text-anchor="middle" font-size="17" fill="#0f766e">陰圧が再形成の原因になる</text>
+</svg>""",
+        "complications": """<svg viewBox="0 0 360 260" role="img" aria-label="耳の周囲にある顔面神経や内耳へのリスク図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <path d="M78 137c31-58 76-82 134-66 42 12 65 44 69 91" fill="none" stroke="#bfdbfe" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="210" cy="125" r="25" fill="#fde68a" stroke="#d97706" stroke-width="5"/>
+  <path d="M254 84c29 26 30 62 2 91" fill="none" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/>
+  <text x="279" y="80" font-size="14" fill="#dc2626">顔面神経</text>
+  <path d="M286 138c20-17 34-16 43 2s-2 34-24 34" fill="none" stroke="#7c3aed" stroke-width="7" stroke-linecap="round"/>
+  <text x="282" y="199" font-size="14" fill="#6d28d9">内耳</text>
+  <text x="180" y="226" text-anchor="middle" font-size="17" fill="#0f766e">近くの神経・内耳に注意</text>
+</svg>""",
+        "red-flags": """<svg viewBox="0 0 360 260" role="img" aria-label="退院後すぐ連絡すべき赤信号症状の図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <path d="M180 42l88 154H92z" fill="#fee2e2" stroke="#dc2626" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M180 95v54" stroke="#dc2626" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="180" cy="171" r="8" fill="#dc2626"/>
+  <g font-size="14" fill="#991b1b">
+    <text x="35" y="68">強いめまい</text>
+    <text x="253" y="68">顔の麻痺</text>
+    <text x="36" y="218">高熱・頭痛</text>
+    <text x="245" y="218">透明な耳だれ</text>
+  </g>
+</svg>""",
+        "follow-up": """<svg viewBox="0 0 360 260" role="img" aria-label="術後の耳の安静と定期通院の図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <rect x="68" y="58" width="224" height="142" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="5"/>
+  <path d="M96 101h168M96 141h168" stroke="#cbd5e1" stroke-width="5"/>
+  <circle cx="118" cy="101" r="13" fill="#ccfbf1" stroke="#0f766e" stroke-width="5"/>
+  <path d="M111 101l6 7 13-18" fill="none" stroke="#0f766e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="118" cy="141" r="13" fill="#ccfbf1" stroke="#0f766e" stroke-width="5"/>
+  <path d="M111 141l6 7 13-18" fill="none" stroke="#0f766e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="180" y="226" text-anchor="middle" font-size="17" fill="#0f766e">安静と定期チェック</text>
+</svg>""",
+        "child-ear-growth": """<svg viewBox="0 0 360 260" role="img" aria-label="小児の乳突蜂巣の発育と中耳炎の影響を示す図">
+  <rect width="360" height="260" rx="18" fill="#ffffff"/>
+  <text x="100" y="50" text-anchor="middle" font-size="15" fill="#0f766e">発育良好</text>
+  <circle cx="100" cy="119" r="55" fill="#dbeafe" stroke="#2563eb" stroke-width="5"/>
+  <g fill="#ffffff" stroke="#60a5fa" stroke-width="3">
+    <circle cx="79" cy="105" r="10"/><circle cx="105" cy="93" r="12"/><circle cx="123" cy="120" r="11"/><circle cx="91" cy="139" r="12"/>
+  </g>
+  <text x="260" y="50" text-anchor="middle" font-size="15" fill="#b45309">発育不良</text>
+  <circle cx="260" cy="119" r="55" fill="#ffedd5" stroke="#ea580c" stroke-width="5"/>
+  <path d="M226 119h68" stroke="#ea580c" stroke-width="13" stroke-linecap="round"/>
+  <text x="180" y="226" text-anchor="middle" font-size="17" fill="#0f766e">子どもは耳の成長も守る</text>
+</svg>""",
+    }
+    return visuals.get(visual_key, "")
+
+def section_visual_html(visual_key):
+    """図版キーに対応するドラフト画像を返す。画像は医師レビュー前のサンプル扱い。"""
+    visuals = {
+        "cover": ("cholesteatoma-growth.png", "真珠腫が中耳で広がる位置関係の模式図"),
+        "cholesteatoma-growth": ("cholesteatoma-growth.png", "鼓膜の奥に真珠腫ができ、耳小骨や周囲の骨へ近づく様子"),
+        "surgery-purpose": ("surgery-purpose.png", "耳の後ろ側から病変へ到達し、真珠腫を取り除く考え方"),
+        "surgical-approaches": ("surgery-purpose.png", "真珠腫の広がりに合わせて安全な手術方法を選びます"),
+        "reconstruction": ("reconstruction.png", "鼓膜や耳小骨を、軟骨や筋膜で補う再建イメージ"),
+        "recurrence-types": ("recurrence-types.png", "遺残と再形成という2種類の再発パターン"),
+        "sniffing-pressure": ("sniffing-pressure.png", "鼻すすりで耳の中に陰圧がかかり、鼓膜が奥へ引かれる仕組み"),
+        "complications": ("complications-risk.png", "顔面神経や内耳など、真珠腫の近くにある重要な構造"),
+        "red-flags": ("complications-risk.png", "強いめまい、顔の動きにくさ、聞こえの急な悪化などに注意します"),
+        "follow-up": ("recurrence-types.png", "手術後も再発確認のため、長期間の定期通院が必要です"),
+        "child-ear-growth": ("cholesteatoma-growth.png", "小児では耳の成長も考えて治療方針を決めます"),
+    }
+    item = visuals.get(visual_key)
+    if not item:
+        return ""
+    filename, caption = item
+    src = f"../images/draft/cholesteatoma/{filename}"
+    return f"""<figure>
+  <img src="{html.escape(src)}" alt="{html.escape(caption)}">
+  <figcaption>{html.escape(caption)}<br>※AI生成ドラフト。臨床使用前に医師の確認が必要です。</figcaption>
+</figure>"""
+
+def generate_print_consent_html(title, metadata):
+    """印刷時だけ表示する手術説明書・同意確認欄を生成する。"""
+    document_type = metadata.get("document_type") or "手術説明書・同意確認書"
+    diagnosis = metadata.get("diagnosis") or ""
+    procedure_name = metadata.get("procedure_name") or title
+    anesthesia = metadata.get("anesthesia") or ""
+    laterality = metadata.get("laterality") or "右・左"
+    version = metadata.get("version") or ""
+    updated = metadata.get("updated") or ""
+    reviewed_by = metadata.get("reviewed_by") or "未確認"
+    review_date = metadata.get("review_date") or ""
+
+    return f"""      <section class="print-consent" aria-label="印刷用同意確認欄">
+        <h1>{html.escape(document_type)}</h1>
+        <div class="consent-meta-grid">
+          <div class="consent-field"><span class="consent-label">文書名</span>{html.escape(title)}</div>
+          <div class="consent-field"><span class="consent-label">病名</span>{html.escape(diagnosis)}</div>
+          <div class="consent-field"><span class="consent-label">手術名</span>{html.escape(procedure_name)}</div>
+          <div class="consent-field"><span class="consent-label">麻酔</span>{html.escape(anesthesia)}</div>
+          <div class="consent-field"><span class="consent-label">術側</span>{html.escape(laterality)}</div>
+          <div class="consent-field"><span class="consent-label">手術予定日</span>　　　　年　　　月　　　日</div>
+          <div class="consent-field"><span class="consent-label">患者氏名</span></div>
+          <div class="consent-field"><span class="consent-label">説明日</span>　　　　年　　　月　　　日</div>
+          <div class="consent-field"><span class="consent-label">説明医</span></div>
+          <div class="consent-field"><span class="consent-label">同席者・ご家族</span></div>
+        </div>
+        <div class="consent-summary">
+          <h2>説明・確認項目</h2>
+          <ul>
+            <li>病気の状態と、手術が必要となる理由</li>
+            <li>手術の目的、方法、麻酔、術式が変更となる可能性</li>
+            <li>期待される効果と、聴力が改善しないまたは悪化する可能性</li>
+            <li>出血、感染、めまい、難聴、耳鳴り、味覚障害、顔面神経麻痺、髄液漏、髄膜炎、再発などの合併症</li>
+            <li>経過観察や処置など、手術以外の選択肢と限界</li>
+            <li>術後の注意点、受診が必要な症状、長期通院の必要性</li>
+          </ul>
+        </div>
+        <div class="signature-grid">
+          <div class="signature-box">
+            <strong>患者さん・代諾者署名</strong>
+            <div class="signature-line"></div>
+            <div>続柄：</div>
+          </div>
+          <div class="signature-box">
+            <strong>医療者記入欄</strong>
+            <div class="signature-line"></div>
+            <div>説明医署名：</div>
+          </div>
+        </div>
+        <p class="print-note">この欄は印刷時の確認用です。電子表示・スライド表示では説明を見やすくするため、本文中心の構成にしています。版数: {html.escape(version)} / 更新日: {html.escape(updated)} / 医師レビュー: {html.escape(reviewed_by)} {html.escape(review_date)}</p>
+      </section>"""
+
 # セクションのHTMLブロックを生成
 def generate_sections_html(title, description, sections):
     html_blocks = []
     
     for sec in sections:
+        slide_summary = sec.get("slide_summary", "")
+        slide_summary_html = f'            <p class="slide-summary">{slide_summary}</p>' if slide_summary else ""
+        summary_class = " has-slide-summary" if slide_summary else ""
         if sec["is_cover"]:
             # カバーセクションのマークアップ
             lead_html = f'        <p class="lead">{description}</p>' if description else ""
-            block = f"""      <section class="doc-cover section-block">
-        <p class="eyebrow">患者さん・ご家族への説明資料</p>
-        <h1>{title}</h1>
+            visual_html = section_visual_html(sec.get("visual_key", "cover"))
+            block = f"""      <section class="doc-cover section-block{summary_class}">
+        <div class="section-layout">
+          <div class="section-text">
+            <p class="eyebrow">患者さん・ご家族への説明資料</p>
+            <h1>{title}</h1>
 {lead_html}
 {sec['content']}
+{slide_summary_html}
+          </div>
+          <div class="section-visual" aria-hidden="true">
+{visual_html}
+          </div>
+        </div>
       </section>"""
         else:
             # 通常セクションのマークアップ
-            block = f"""      <section class="section-block">
+            visual_html = section_visual_html(sec.get("visual_key", ""))
+            block = f"""      <section class="section-block{summary_class}">
+        <div class="section-layout">
+          <div class="section-text">
 {sec['content']}
+{slide_summary_html}
+          </div>
+          <div class="section-visual" aria-hidden="true">
+{visual_html}
+          </div>
+        </div>
       </section>"""
         html_blocks.append(block)
         
     return "\n\n".join(html_blocks)
 
 # メイン処理：Markdownファイルの一括変換
-def convert_all_markdowns():
+def convert_all_markdowns(target_names=None):
     md_files = glob.glob(os.path.join(base_dir, "src", "*.md"))
+    if target_names:
+        normalized_targets = {
+            name if name.endswith(".md") else f"{name}.md"
+            for name in target_names
+        }
+        md_files = [
+            path for path in md_files
+            if os.path.basename(path) in normalized_targets
+        ]
     success_count = 0
     error_files = []
     
@@ -688,6 +1045,7 @@ def convert_all_markdowns():
                 
             title, description, sections, metadata = parse_markdown_to_sections(md_text)
             content_html = generate_sections_html(title, description, sections)
+            print_consent_html = generate_print_consent_html(title, metadata)
             
             # メタデータコメント文字列の生成
             meta_comments_lines = [
@@ -698,7 +1056,7 @@ def convert_all_markdowns():
                 f"  Meta:change_reason: {metadata.get('change_reason', '')}",
                 f"  Meta:version: {metadata.get('version', '')}",
                 f"  Meta:build_datetime: {metadata.get('build_datetime', '')}",
-                f"  Meta:images: {', '.join(metadata.get('images', []))}",
+                f"  Meta:images: {metadata.get('images', '')}",
                 "-->"
             ]
             meta_comments_str = "\n".join(meta_comments_lines)
@@ -707,6 +1065,7 @@ def convert_all_markdowns():
             final_html = html_template.format(
                 title=title, 
                 content=content_html, 
+                print_consent=print_consent_html,
                 meta_comments=meta_comments_str
             )
             
@@ -730,4 +1089,11 @@ def convert_all_markdowns():
             print(f" - {name}: {err}")
 
 if __name__ == "__main__":
-    convert_all_markdowns()
+    parser = argparse.ArgumentParser(description="患者説明文書MarkdownをHTMLに変換します。")
+    parser.add_argument(
+        "targets",
+        nargs="*",
+        help="変換するMarkdownファイル名。省略時はsrc配下の全Markdownを変換します。",
+    )
+    args = parser.parse_args()
+    convert_all_markdowns(args.targets)
