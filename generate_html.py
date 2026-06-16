@@ -213,7 +213,11 @@ html_template = """<!doctype html>
     .signature-box {{ min-height: 28mm; padding: 3mm; border: 1pt solid #333333; }}
     .signature-line {{ margin-top: 8mm; border-bottom: 1pt solid #333333; height: 8mm; }}
     .print-note {{ margin-top: 4mm; font-size: 10.5pt; }}
-    .section-block {{ break-inside: avoid; page-break-inside: avoid; padding: 0 0 7mm; border: 0; }}
+    
+    /* 改ページ制御の最適化: セクション全体のbreak-insideを解除し、子要素と見出し泣き別れを制御 */
+    .section-block {{ break-inside: auto; page-break-inside: auto; padding: 0 0 7mm; border: 0; }}
+    p, li, .note, .urgent {{ break-inside: avoid; page-break-inside: avoid; }}
+    
     .doc-cover {{ padding-top: 0; background: #ffffff; }}
     .eyebrow {{ margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }}
     h1, h2, h3 {{ break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }}
@@ -231,7 +235,7 @@ html_template = """<!doctype html>
     .section-visual img {{ max-width: 42mm; }}
     .section-visual figcaption {{ font-size: 8.5pt; }}
     .note, .urgent {{
-      break-inside: avoid; page-break-inside: avoid; padding: 3mm;
+      padding: 3mm;
       border: 1.2pt solid #333333; background: #ffffff !important;
     }}
     .step-list, .risk-grid {{ display: block; }}
@@ -265,8 +269,17 @@ html_template = """<!doctype html>
     .signature-box {{ min-height: 20mm; padding: 2mm; border: 0.8pt solid #333333; }}
     .signature-line {{ margin-top: 5mm; border-bottom: 0.8pt solid #333333; height: 6mm; }}
     .print-note {{ margin-top: 2mm; font-size: 8.5pt; }}
-    .section-block {{ break-inside: avoid; page-break-inside: avoid; padding: 0 0 4mm; border: 0; }}
+    
+    /* 改ページ制御の最適化: セクション全体のbreak-insideを解除し、子要素と見出し泣き別れを制御 */
+    .section-block {{ break-inside: auto; page-break-inside: auto; padding: 0 0 4mm; border: 0; }}
+    p, li, .note, .urgent {{ break-inside: avoid; page-break-inside: avoid; }}
+    
+    /* 紙節約用の2段組み設定 */
+    .section-text {{ column-count: 2; column-gap: 6mm; }}
+    h2, h3 {{ column-span: all; }}
+    
     .doc-cover {{ padding-top: 0; background: #ffffff; }}
+    .doc-cover .section-text {{ column-count: 1; }} /* 表紙セクションは2段組みにしない */
     .eyebrow {{ margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }}
     h1, h2, h3 {{ break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }}
     h1 {{ margin: 0 0 3mm; font-size: 18pt; }}
@@ -277,8 +290,15 @@ html_template = """<!doctype html>
     li {{ margin: 0.8mm 0; }}
     a {{ color: #111111; text-decoration: none; }}
     .lead {{ font-size: 11.5pt; }}
+    
+    .section-layout {{ display: grid; grid-template-columns: minmax(0, 1fr) 35mm; gap: 4mm; }}
+    .section-visual {{ min-height: 25mm; padding: 1.5mm; border: 0.8pt solid #aaaaaa; background: #ffffff !important; }}
+    .section-visual svg {{ max-width: 30mm; }}
+    .section-visual img {{ max-width: 32mm; }}
+    .section-visual figcaption {{ font-size: 7.5pt; }}
+    
     .note, .urgent {{
-      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
+      padding: 2mm;
       border: 0.8pt solid #333333; background: #ffffff !important;
     }}
     .step-list, .risk-grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }}
@@ -290,16 +310,79 @@ html_template = """<!doctype html>
     .check-list li {{ padding-left: 0; }}
     .check-list li::before {{ display: none; }}
   </style>
+  <style id="print-infographic-css" media="not all">
+    @page {{ size: A4; margin: 8mm 8mm 8mm; }}
+    * {{ box-shadow: none !important; text-shadow: none !important; }}
+    html, body {{
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10pt; line-height: 1.25;
+    }}
+    .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
+    .print-consent {{ display: block; padding: 0 0 3mm; border-bottom: 1pt solid #111111; margin-bottom: 4mm; }}
+    .print-consent h1 {{ margin: 0 0 2mm; font-size: 15pt; text-align: center; }}
+    .consent-meta-grid {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5mm; margin-top: 2mm; }}
+    .consent-field {{ min-height: 8mm; padding: 1mm; border: 0.5pt solid #333333; font-size: 8pt; }}
+    .consent-label {{ display: block; margin-bottom: 0.5mm; font-size: 7pt; font-weight: 700; }}
+    .consent-summary {{ display: none; }} /* A4チラシでは説明本文と重複するため同意欄のサマリーは非表示 */
+    .signature-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 3mm; }}
+    .signature-box {{ min-height: 15mm; padding: 1.5mm; border: 0.8pt solid #333333; font-size: 8pt; }}
+    .signature-line {{ margin-top: 3mm; border-bottom: 0.8pt solid #333333; height: 4mm; }}
+    .print-note {{ margin-top: 1mm; font-size: 7.5pt; }}
+
+    .section-block {{ break-inside: avoid; page-break-inside: avoid; padding: 0 0 3mm; border: 0; border-bottom: 0.5pt dashed #cccccc; }}
+    .section-block:last-child {{ border-bottom: 0; }}
+    .doc-cover {{ padding-top: 0; background: #ffffff; }}
+    .eyebrow {{ margin: 0 0 1mm; font-size: 8.5pt; font-weight: 700; color: var(--accent-strong); }}
+    h1, h2, h3 {{ break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.15; }}
+    h1 {{ margin: 0 0 2mm; font-size: 16pt; }}
+    h2 {{ margin: 0 0 1.5mm; padding: 0 0 0.5mm; border: 0; border-left: 3.5pt solid #111111; padding-left: 6px; font-size: 11pt; }}
+    h3 {{ margin: 0 0 1mm; font-size: 9.5pt; }}
+    p, ul, ol, dl {{ margin-top: 0; margin-bottom: 1.5mm; }}
+    ul, ol {{ padding-left: 1.2em; }}
+    li {{ margin: 0.5mm 0; }}
+    a {{ color: #111111; text-decoration: none; }}
+    .lead {{ font-size: 10pt; margin-top: 1mm; margin-bottom: 2mm; }}
+    .note, .urgent {{
+      break-inside: avoid; page-break-inside: avoid; padding: 1.5mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+      font-size: 9pt; margin-bottom: 1.5mm;
+    }}
+    .step-list, .risk-grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5mm; margin-bottom: 1.5mm; }}
+    .step-list section, .risk-grid section {{
+      break-inside: avoid; page-break-inside: avoid; padding: 1.5mm;
+      border: 0.5pt solid #666666; background: #ffffff !important;
+      font-size: 9pt;
+    }}
+    .check-list {{ list-style: square; padding-left: 1.2em; }}
+    .check-list li {{ padding-left: 0; }}
+    .check-list li::before {{ display: none; }}
+
+    .section-layout {{ display: grid; grid-template-columns: minmax(0, 1fr) 32mm; gap: 3mm; align-items: start; }}
+    .section-visual {{ min-height: 22mm; padding: 1mm; border: 0.5pt solid #aaaaaa; background: #ffffff !important; }}
+    .section-visual svg {{ max-width: 30mm; }}
+    .section-visual img {{ max-width: 30mm; }}
+    .section-visual figcaption {{ font-size: 7.5pt; margin-top: 3px; }}
+  </style>
   <style id="slides-css" media="not all">
-    body[data-mode="slides"] {{ overflow: hidden; background: #0f172a; }}
+    body[data-mode="slides"] {{ overflow: hidden; background: #0b1329; }}
     body[data-mode="slides"] .app-toolbar {{
-      background: rgba(15, 23, 42, 0.94); border-bottom-color: rgba(255, 255, 255, 0.16);
+      background: rgba(11, 19, 41, 0.95); border-bottom-color: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
     }}
-    body[data-mode="slides"] .toolbar-title {{ color: #ccfbf1; }}
+    body[data-mode="slides"] .toolbar-title {{ color: #81e6d9; font-weight: 600; }}
     body[data-mode="slides"] button {{
-      border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.08); color: #f8fafc;
+      border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); color: #e2e8f0;
+      border-radius: 8px; transition: all 0.25s ease;
     }}
-    body[data-mode="slides"] button[aria-pressed="true"] {{ background: #14b8a6; color: #062926; }}
+    body[data-mode="slides"] button:hover {{
+      background: rgba(255, 255, 255, 0.12); color: #ffffff; border-color: rgba(255, 255, 255, 0.3);
+    }}
+    body[data-mode="slides"] button[aria-pressed="true"] {{
+      background: #0d9488; color: #ffffff; border-color: #0d9488; font-weight: 600;
+      box-shadow: 0 0 12px rgba(13, 148, 136, 0.4);
+    }}
     body[data-mode="slides"] .document {{
       width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
       overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
@@ -309,56 +392,150 @@ html_template = """<!doctype html>
     }}
     body[data-mode="slides"] .section-block {{
       display: flex; flex-direction: column; justify-content: center;
-      width: 100vw; height: 100%; padding: clamp(28px, 6vw, 76px);
-      overflow-y: auto; scroll-snap-align: start; border: 0; background: #f8fafc;
+      width: 100vw; height: 100%; padding: clamp(40px, 8vw, 100px);
+      overflow-y: auto; scroll-snap-align: start; border: 0;
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      box-shadow: inset 0 0 80px rgba(15, 118, 110, 0.03);
     }}
     body[data-mode="slides"] .section-layout {{
-      grid-template-columns: minmax(0, 1fr) minmax(260px, 34vw);
-      gap: clamp(24px, 5vw, 72px);
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 36vw);
+      gap: clamp(32px, 6vw, 88px);
       align-items: center;
-      min-height: 62vh;
+      min-height: 65vh;
     }}
     body[data-mode="slides"] .section-visual {{
-      min-height: min(44vh, 360px);
-      border: 0;
-      background: #f0fdfa;
-      padding: clamp(18px, 3vw, 32px);
+      min-height: min(46vh, 380px);
+      border: 1px solid rgba(20, 184, 166, 0.12);
+      border-radius: 20px;
+      background: #ffffff;
+      padding: clamp(20px, 3vw, 36px);
+      box-shadow: 0 20px 40px -12px rgba(15, 118, 110, 0.08), 0 1px 3px rgba(15, 118, 110, 0.02);
     }}
-    body[data-mode="slides"] .section-visual svg {{ max-width: 320px; }}
-    body[data-mode="slides"] .section-visual img {{ max-width: min(520px, 100%); }}
-    body[data-mode="slides"] .section-visual figcaption {{ font-size: clamp(14px, 1.2vw, 18px); }}
-    body[data-mode="slides"] .doc-cover {{ background: #ecfeff; }}
+    body[data-mode="slides"] .section-visual svg {{ max-width: 340px; }}
+    body[data-mode="slides"] .section-visual img {{
+      max-width: min(540px, 100%);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    }}
+    body[data-mode="slides"] .section-visual figcaption {{
+      font-size: clamp(13px, 1.1vw, 16px);
+      color: #475569;
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 14px;
+    }}
+    body[data-mode="slides"] .doc-cover {{
+      background: linear-gradient(135deg, #e6fffa 0%, #e0f2fe 100%);
+    }}
     body[data-mode="slides"] .print-consent {{ display: none !important; }}
-    body[data-mode="slides"] h1 {{ max-width: 1000px; font-size: clamp(40px, 6vw, 78px); }}
+    body[data-mode="slides"] h1 {{
+      max-width: 1100px;
+      font-size: clamp(38px, 5.2vw, 68px);
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }}
     body[data-mode="slides"] h2 {{
-      margin-bottom: 28px; padding-left: 18px; border-left-width: 8px; font-size: clamp(30px, 4vw, 54px);
+      margin-bottom: clamp(24px, 3.5vw, 42px);
+      padding-left: 20px;
+      border-left: 8px solid #0d9488;
+      border-radius: 4px;
+      font-size: clamp(30px, 3.8vw, 46px);
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
     }}
     body[data-mode="slides"] .section-block.has-slide-summary .section-text > :not(h2):not(.slide-summary) {{ display: none; }}
-    body[data-mode="slides"] .slide-summary {{ display: block; }}
-    body[data-mode="slides"] h3 {{ font-size: clamp(20px, 2vw, 28px); }}
-    body[data-mode="slides"] p, body[data-mode="slides"] li {{
-      max-width: 1100px; font-size: clamp(20px, 2vw, 30px); line-height: 1.55;
+    body[data-mode="slides"] .slide-summary {{ display: block; font-weight: 500; color: #0f766e; }}
+    body[data-mode="slides"] h3 {{
+      font-size: clamp(20px, 2.2vw, 28px);
+      color: #0d9488;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      font-weight: 700;
     }}
-    body[data-mode="slides"] .lead {{ font-size: clamp(24px, 2.5vw, 34px); }}
+    body[data-mode="slides"] p, body[data-mode="slides"] li {{
+      max-width: 1100px;
+      font-size: clamp(19px, 1.8vw, 26px);
+      line-height: 1.6;
+      color: #334155;
+    }}
+    body[data-mode="slides"] li {{
+      position: relative;
+      padding-left: 1.6em;
+      list-style-type: none;
+      margin: 10px 0;
+    }}
+    body[data-mode="slides"] li::before {{
+      content: "•";
+      color: #0d9488;
+      font-weight: bold;
+      display: inline-block;
+      width: 1em;
+      margin-left: -1em;
+      font-size: 1.3em;
+      vertical-align: middle;
+      position: absolute;
+      left: 0.8em;
+      top: -0.05em;
+    }}
+    body[data-mode="slides"] .lead {{
+      font-size: clamp(22px, 2.2vw, 30px);
+      line-height: 1.65;
+      color: #334155;
+      font-weight: 500;
+    }}
     body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {{
-      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 18px;
+      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 20px;
+      margin-top: 18px;
     }}
     body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
     body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {{
-      background: #ffffff; border-color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(20, 184, 166, 0.12);
+      border-radius: 16px;
+      padding: clamp(20px, 2.5vw, 32px);
+      box-shadow: 0 10px 30px -10px rgba(15, 118, 110, 0.06), 0 1px 3px rgba(15, 118, 110, 0.02);
+      backdrop-filter: blur(12px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }}
+    body[data-mode="slides"] .step-list section:hover,
+    body[data-mode="slides"] .risk-grid section:hover {{
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -15px rgba(15, 118, 110, 0.12);
+      border-color: rgba(20, 184, 166, 0.3);
+    }}
+    body[data-mode="slides"] .note {{
+      border-left: 8px solid #d97706;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(254, 243, 199, 0.4) 100%);
+    }}
+    body[data-mode="slides"] .urgent {{
+      border-left: 8px solid #b42318;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(254, 226, 226, 0.4) 100%);
+      border-color: rgba(180, 35, 24, 0.12);
     }}
     .slide-pagination {{ display: none; }}
     body[data-mode="slides"] .slide-pagination {{
-      position: fixed; right: 22px; bottom: 18px; z-index: 20;
-      display: flex; align-items: center; gap: 12px; min-width: 148px; justify-content: center;
-      padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
-      background: rgba(15, 23, 42, 0.88); color: #f8fafc; font-size: 16px; line-height: 1;
+      position: fixed; right: 30px; bottom: 24px; z-index: 20;
+      display: flex; align-items: center; gap: 16px; min-width: 168px; justify-content: center;
+      padding: 10px 16px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 30px;
+      background: rgba(11, 19, 41, 0.88); color: #f8fafc; font-size: 15px; line-height: 1;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); backdrop-filter: blur(10px);
     }}
     body[data-mode="slides"] .slide-nav {{
       display: inline-flex; align-items: center; justify-content: center;
-      width: 34px; min-height: 34px; padding: 0;
-      border-color: rgba(255, 255, 255, 0.24); border-radius: 6px;
-      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 24px; line-height: 1;
+      width: 36px; height: 36px; min-height: 36px; padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 20px; line-height: 1;
+      cursor: pointer; transition: all 0.2s ease;
+    }}
+    body[data-mode="slides"] .slide-nav:hover {{
+      background: #0d9488; color: #ffffff; border-color: #0d9488;
+      box-shadow: 0 0 8px rgba(13, 148, 136, 0.5);
     }}
     @media print {{ .slide-pagination {{ display: none !important; }} }}
   </style>
@@ -370,6 +547,7 @@ html_template = """<!doctype html>
       <button type="button" data-mode="screen" aria-pressed="true">画面</button>
       <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
       <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="infographic" aria-pressed="false">A4チラシ</button>
       <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
       <button type="button" data-action="print">印刷/PDF</button>
     </div>
@@ -391,6 +569,7 @@ html_template = """<!doctype html>
   <script>
     const printLarge = document.getElementById("print-large-css");
     const printCompact = document.getElementById("print-compact-css");
+    const printInfographic = document.getElementById("print-infographic-css");
     const slides = document.getElementById("slides-css");
     const buttons = document.querySelectorAll("[data-mode]");
     const documentFrame = document.querySelector(".document");
@@ -401,8 +580,9 @@ html_template = """<!doctype html>
 
     function setMode(mode) {{
       document.body.dataset.mode = mode;
-      printLarge.media = mode === "large" || mode === "screen" || mode === "slides" ? "print" : "not all";
-      printCompact.media = mode === "compact" ? "print" : "not all";
+      printLarge.media = mode === "large" ? "all" : (mode === "screen" || mode === "slides" ? "print" : "not all");
+      printCompact.media = mode === "compact" ? "all" : "not all";
+      printInfographic.media = mode === "infographic" ? "all" : "not all";
       slides.media = mode === "slides" ? "screen" : "not all";
       buttons.forEach((button) => {{
         button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
@@ -501,7 +681,8 @@ def parse_markdown_to_sections(md_text):
         "procedure_name": "",
         "anesthesia": "",
         "laterality": "",
-        "document_type": ""
+        "document_type": "",
+        "print_consent": "true"
     }
     
     if len(lines) > 0 and lines[0].strip() == "---":
@@ -1045,7 +1226,12 @@ def convert_all_markdowns(target_names=None):
                 
             title, description, sections, metadata = parse_markdown_to_sections(md_text)
             content_html = generate_sections_html(title, description, sections)
-            print_consent_html = generate_print_consent_html(title, metadata)
+            
+            # print_consent が "false" の場合は、署名欄を出力せず空にする
+            if metadata.get("print_consent", "true").lower() == "false":
+                print_consent_html = ""
+            else:
+                print_consent_html = generate_print_consent_html(title, metadata)
             
             # メタデータコメント文字列の生成
             meta_comments_lines = [
