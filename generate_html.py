@@ -662,11 +662,13 @@ html_template = """<!doctype html>
 </html>
 """
 
+
 # Markdownのパースとセクション分割ロジック
 def parse_markdown_to_sections(md_text):
     import datetime
+
     lines = md_text.splitlines()
-    
+
     # 1. フロントマター (YAML) の抽出
     title = "患者説明資料"
     description = ""
@@ -682,9 +684,9 @@ def parse_markdown_to_sections(md_text):
         "anesthesia": "",
         "laterality": "",
         "document_type": "",
-        "print_consent": "true"
+        "print_consent": "true",
     }
-    
+
     if len(lines) > 0 and lines[0].strip() == "---":
         fm_lines = []
         for i in range(1, len(lines)):
@@ -692,7 +694,7 @@ def parse_markdown_to_sections(md_text):
                 start_idx = i + 1
                 break
             fm_lines.append(lines[i])
-        
+
         # フロントマターの解析
         for line in fm_lines:
             m_title = re.match(r"^title:\s*(.*)$", line)
@@ -703,7 +705,7 @@ def parse_markdown_to_sections(md_text):
             if m_desc:
                 description = m_desc.group(1).strip().strip('"').strip("'")
                 continue
-            
+
             # その他の追跡メタデータを抽出
             for key in metadata.keys():
                 m_meta = re.match(rf"^{key}:\s*(.*)$", line)
@@ -717,7 +719,7 @@ def parse_markdown_to_sections(md_text):
     metadata["build_datetime"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     body_lines = lines[start_idx:]
-    
+
     # 2. 最初にあるH1 (# タイトル) を抽出し、フロントマターにタイトルがない場合はそれをタイトルにする
     content_lines = []
     for line in body_lines:
@@ -729,22 +731,22 @@ def parse_markdown_to_sections(md_text):
                     title = raw_title
             continue
         content_lines.append(line)
-        
+
     # 3. 行ごとに解析してHTMLセクションに分類
     sections = []
     current_section_content = []
     current_section_title = ""
     current_section_visual_key = ""
     current_section_slide_summary = ""
-    is_cover = True # 最初のH2に到達するまではカバーセクション
-    
+    is_cover = True  # 最初のH2に到達するまではカバーセクション
+
     # リスト状態管理
     in_ul = False
     in_ol = False
     in_p = False
     in_note = False
     in_urgent = False
-    
+
     def close_all_tags(content_list):
         nonlocal in_ul, in_ol, in_p, in_note, in_urgent
         out = []
@@ -766,37 +768,41 @@ def parse_markdown_to_sections(md_text):
 
     for line in content_lines:
         cleaned_line = line.strip()
-        
+
         # H2見出し (セクションの境界)
         if cleaned_line.startswith("##") and not cleaned_line.startswith("###"):
             h2_text = re.sub(r"^##\s*", "", cleaned_line).replace("**", "").strip()
             # 空の H2 (## のみ等) は無視して完全に除外する
             if not h2_text:
                 continue
-                
+
             # 既存のセクションをクローズして保存
             close_all_tags(current_section_content)
-            
+
             if is_cover:
                 # カバーセクションを保存
-                sections.append({
-                    "is_cover": True,
-                    "title": title,
-                    "visual_key": "cover",
-                    "slide_summary": current_section_slide_summary,
-                    "content": "\n".join(current_section_content)
-                })
+                sections.append(
+                    {
+                        "is_cover": True,
+                        "title": title,
+                        "visual_key": "cover",
+                        "slide_summary": current_section_slide_summary,
+                        "content": "\n".join(current_section_content),
+                    }
+                )
                 is_cover = False
             else:
                 # 通常セクションを保存
-                sections.append({
-                    "is_cover": False,
-                    "title": current_section_title,
-                    "visual_key": current_section_visual_key,
-                    "slide_summary": current_section_slide_summary,
-                    "content": "\n".join(current_section_content)
-                })
-            
+                sections.append(
+                    {
+                        "is_cover": False,
+                        "title": current_section_title,
+                        "visual_key": current_section_visual_key,
+                        "slide_summary": current_section_slide_summary,
+                        "content": "\n".join(current_section_content),
+                    }
+                )
+
             # 新しいセクションをスタート
             current_section_content = []
             current_section_title = h2_text
@@ -805,16 +811,22 @@ def parse_markdown_to_sections(md_text):
             current_section_content.append(f"      <h2>{h2_text}</h2>")
             continue
 
-        visual_match = re.match(r"^\{\{visual:\s*([a-zA-Z0-9_-]+)\s*\}\}$", cleaned_line)
+        visual_match = re.match(
+            r"^\{\{visual:\s*([a-zA-Z0-9_-]+)\s*\}\}$", cleaned_line
+        )
         if visual_match:
             current_section_visual_key = visual_match.group(1)
             continue
 
-        slide_summary_match = re.match(r"^\{\{slide_summary:\s*(.*?)\s*\}\}$", cleaned_line)
+        slide_summary_match = re.match(
+            r"^\{\{slide_summary:\s*(.*?)\s*\}\}$", cleaned_line
+        )
         if slide_summary_match:
-            current_section_slide_summary = format_inline_elements(slide_summary_match.group(1).strip())
+            current_section_slide_summary = format_inline_elements(
+                slide_summary_match.group(1).strip()
+            )
             continue
-            
+
         # 空行
         if not cleaned_line:
             if in_p:
@@ -823,9 +835,13 @@ def parse_markdown_to_sections(md_text):
             continue
 
         # リストマークアップのクローズ判定
-        is_list_line = (cleaned_line.startswith("- ") or cleaned_line.startswith("* ") or 
-                        cleaned_line.startswith("+ ") or re.match(r"^\d+\.\s+", cleaned_line))
-        
+        is_list_line = (
+            cleaned_line.startswith("- ")
+            or cleaned_line.startswith("* ")
+            or cleaned_line.startswith("+ ")
+            or re.match(r"^\d+\.\s+", cleaned_line)
+        )
+
         if not is_list_line:
             if in_ul:
                 current_section_content.append("        </ul>")
@@ -833,9 +849,13 @@ def parse_markdown_to_sections(md_text):
             if in_ol:
                 current_section_content.append("        </ol>")
                 in_ol = False
-                
+
         # 箇条書きリスト (UL)
-        if cleaned_line.startswith("- ") or cleaned_line.startswith("* ") or cleaned_line.startswith("+ "):
+        if (
+            cleaned_line.startswith("- ")
+            or cleaned_line.startswith("* ")
+            or cleaned_line.startswith("+ ")
+        ):
             if not in_ul:
                 # Pがオープンしていれば閉じる
                 if in_p:
@@ -847,7 +867,7 @@ def parse_markdown_to_sections(md_text):
             list_text = format_inline_elements(list_text)
             current_section_content.append(f"          <li>{list_text}</li>")
             continue
-            
+
         # 番号付きリスト (OL)
         ol_match = re.match(r"^(\d+)\.\s+(.*)$", cleaned_line)
         if ol_match:
@@ -873,11 +893,17 @@ def parse_markdown_to_sections(md_text):
         # 注記 / コールアウト (引出し線・引用)
         if cleaned_line.startswith("> "):
             quote_text = cleaned_line.replace("> ", "").strip()
-            
+
             # 特別な警告コールアウトか？
-            is_warning = quote_text.startswith("[!NOTE]") or quote_text.startswith("[!TIP]") or quote_text.startswith("[!IMPORTANT]")
-            is_urgent = quote_text.startswith("[!WARNING]") or quote_text.startswith("[!CAUTION]")
-            
+            is_warning = (
+                quote_text.startswith("[!NOTE]")
+                or quote_text.startswith("[!TIP]")
+                or quote_text.startswith("[!IMPORTANT]")
+            )
+            is_urgent = quote_text.startswith("[!WARNING]") or quote_text.startswith(
+                "[!CAUTION]"
+            )
+
             if is_warning:
                 close_all_tags(current_section_content)
                 current_section_content.append('        <div class="note">')
@@ -888,18 +914,18 @@ def parse_markdown_to_sections(md_text):
                 current_section_content.append('        <div class="note urgent">')
                 in_urgent = True
                 continue
-            
+
             # 通常の引用行
             if not (in_note or in_urgent):
                 # デフォルトで注記パネルに入れる
                 close_all_tags(current_section_content)
                 current_section_content.append('        <div class="note">')
                 in_note = True
-            
+
             quote_text = format_inline_elements(quote_text)
             current_section_content.append(f"          <p>{quote_text}</p>")
             continue
-            
+
         # 引用ブロックが途切れたら閉じる
         if not cleaned_line.startswith("> ") and (in_note or in_urgent):
             current_section_content.append("        </div>")
@@ -915,26 +941,31 @@ def parse_markdown_to_sections(md_text):
 
     # 残ったタグを閉じる
     close_all_tags(current_section_content)
-    
+
     # 最後のセクションを保存
     if is_cover:
-        sections.append({
-            "is_cover": True,
-            "title": title,
-            "visual_key": "cover",
-            "slide_summary": current_section_slide_summary,
-            "content": "\n".join(current_section_content)
-        })
+        sections.append(
+            {
+                "is_cover": True,
+                "title": title,
+                "visual_key": "cover",
+                "slide_summary": current_section_slide_summary,
+                "content": "\n".join(current_section_content),
+            }
+        )
     else:
-        sections.append({
-            "is_cover": False,
-            "title": current_section_title,
-            "visual_key": current_section_visual_key,
-            "slide_summary": current_section_slide_summary,
-            "content": "\n".join(current_section_content)
-        })
-        
+        sections.append(
+            {
+                "is_cover": False,
+                "title": current_section_title,
+                "visual_key": current_section_visual_key,
+                "slide_summary": current_section_slide_summary,
+                "content": "\n".join(current_section_content),
+            }
+        )
+
     return title, description, sections, metadata
+
 
 # インライン要素（太字、斜体、改行）のフォーマット
 def format_inline_elements(text):
@@ -945,6 +976,7 @@ def format_inline_elements(text):
     text = text.replace("  ", "<br>")
     text = text.replace("~", "<br>")
     return text
+
 
 def section_visual_svg(visual_key):
     """Markdownで指定された図版キーに対応する説明用模式図を返す。"""
@@ -1075,20 +1107,51 @@ def section_visual_svg(visual_key):
     }
     return visuals.get(visual_key, "")
 
+
 def section_visual_html(visual_key):
     """図版キーに対応するドラフト画像を返す。画像は医師レビュー前のサンプル扱い。"""
     visuals = {
         "cover": ("cholesteatoma-growth.png", "真珠腫が中耳で広がる位置関係の模式図"),
-        "cholesteatoma-growth": ("cholesteatoma-growth.png", "鼓膜の奥に真珠腫ができ、耳小骨や周囲の骨へ近づく様子"),
-        "surgery-purpose": ("surgery-purpose.png", "耳の後ろ側から病変へ到達し、真珠腫を取り除く考え方"),
-        "surgical-approaches": ("surgery-purpose.png", "真珠腫の広がりに合わせて安全な手術方法を選びます"),
-        "reconstruction": ("reconstruction.png", "鼓膜や耳小骨を、軟骨や筋膜で補う再建イメージ"),
-        "recurrence-types": ("recurrence-types.png", "遺残と再形成という2種類の再発パターン"),
-        "sniffing-pressure": ("sniffing-pressure.png", "鼻すすりで耳の中に陰圧がかかり、鼓膜が奥へ引かれる仕組み"),
-        "complications": ("complications-risk.png", "顔面神経や内耳など、真珠腫の近くにある重要な構造"),
-        "red-flags": ("complications-risk.png", "強いめまい、顔の動きにくさ、聞こえの急な悪化などに注意します"),
-        "follow-up": ("recurrence-types.png", "手術後も再発確認のため、長期間の定期通院が必要です"),
-        "child-ear-growth": ("cholesteatoma-growth.png", "小児では耳の成長も考えて治療方針を決めます"),
+        "cholesteatoma-growth": (
+            "cholesteatoma-growth.png",
+            "鼓膜の奥に真珠腫ができ、耳小骨や周囲の骨へ近づく様子",
+        ),
+        "surgery-purpose": (
+            "surgery-purpose.png",
+            "耳の後ろ側から病変へ到達し、真珠腫を取り除く考え方",
+        ),
+        "surgical-approaches": (
+            "surgery-purpose.png",
+            "真珠腫の広がりに合わせて安全な手術方法を選びます",
+        ),
+        "reconstruction": (
+            "reconstruction.png",
+            "鼓膜や耳小骨を、軟骨や筋膜で補う再建イメージ",
+        ),
+        "recurrence-types": (
+            "recurrence-types.png",
+            "遺残と再形成という2種類の再発パターン",
+        ),
+        "sniffing-pressure": (
+            "sniffing-pressure.png",
+            "鼻すすりで耳の中に陰圧がかかり、鼓膜が奥へ引かれる仕組み",
+        ),
+        "complications": (
+            "complications-risk.png",
+            "顔面神経や内耳など、真珠腫の近くにある重要な構造",
+        ),
+        "red-flags": (
+            "complications-risk.png",
+            "強いめまい、顔の動きにくさ、聞こえの急な悪化などに注意します",
+        ),
+        "follow-up": (
+            "recurrence-types.png",
+            "手術後も再発確認のため、長期間の定期通院が必要です",
+        ),
+        "child-ear-growth": (
+            "cholesteatoma-growth.png",
+            "小児では耳の成長も考えて治療方針を決めます",
+        ),
     }
     item = visuals.get(visual_key)
     if not item:
@@ -1099,6 +1162,7 @@ def section_visual_html(visual_key):
   <img src="{html.escape(src)}" alt="{html.escape(caption)}">
   <figcaption>{html.escape(caption)}<br>※AI生成ドラフト。臨床使用前に医師の確認が必要です。</figcaption>
 </figure>"""
+
 
 def generate_print_consent_html(title, metadata):
     """印刷時だけ表示する手術説明書・同意確認欄を生成する。"""
@@ -1152,17 +1216,24 @@ def generate_print_consent_html(title, metadata):
         <p class="print-note">この欄は印刷時の確認用です。電子表示・スライド表示では説明を見やすくするため、本文中心の構成にしています。版数: {html.escape(version)} / 更新日: {html.escape(updated)} / 医師レビュー: {html.escape(reviewed_by)} {html.escape(review_date)}</p>
       </section>"""
 
+
 # セクションのHTMLブロックを生成
 def generate_sections_html(title, description, sections):
     html_blocks = []
-    
+
     for sec in sections:
         slide_summary = sec.get("slide_summary", "")
-        slide_summary_html = f'            <p class="slide-summary">{slide_summary}</p>' if slide_summary else ""
+        slide_summary_html = (
+            f'            <p class="slide-summary">{slide_summary}</p>'
+            if slide_summary
+            else ""
+        )
         summary_class = " has-slide-summary" if slide_summary else ""
         if sec["is_cover"]:
             # カバーセクションのマークアップ
-            lead_html = f'        <p class="lead">{description}</p>' if description else ""
+            lead_html = (
+                f'        <p class="lead">{description}</p>' if description else ""
+            )
             visual_html = section_visual_html(sec.get("visual_key", "cover"))
             block = f"""      <section class="doc-cover section-block{summary_class}">
         <div class="section-layout">
@@ -1170,7 +1241,7 @@ def generate_sections_html(title, description, sections):
             <p class="eyebrow">患者さん・ご家族への説明資料</p>
             <h1>{title}</h1>
 {lead_html}
-{sec['content']}
+{sec["content"]}
 {slide_summary_html}
           </div>
           <div class="section-visual" aria-hidden="true">
@@ -1184,7 +1255,7 @@ def generate_sections_html(title, description, sections):
             block = f"""      <section class="section-block{summary_class}">
         <div class="section-layout">
           <div class="section-text">
-{sec['content']}
+{sec["content"]}
 {slide_summary_html}
           </div>
           <div class="section-visual" aria-hidden="true">
@@ -1193,46 +1264,51 @@ def generate_sections_html(title, description, sections):
         </div>
       </section>"""
         html_blocks.append(block)
-        
+
     return "\n\n".join(html_blocks)
+
 
 # メイン処理：Markdownファイルの一括変換
 def convert_all_markdowns(target_names=None):
     md_files = glob.glob(os.path.join(base_dir, "src", "*.md"))
     if target_names:
         normalized_targets = {
-            name if name.endswith(".md") else f"{name}.md"
-            for name in target_names
+            name if name.endswith(".md") else f"{name}.md" for name in target_names
         }
         md_files = [
-            path for path in md_files
-            if os.path.basename(path) in normalized_targets
+            path for path in md_files if os.path.basename(path) in normalized_targets
         ]
     success_count = 0
     error_files = []
-    
+
     print(f"Total markdown files found: {len(md_files)}")
-    
+
     for filepath in md_files:
         filename = os.path.basename(filepath)
         # 索引ファイルやrules.md等は変換対象から除外
-        if filename in ["README.md", "CHANGELOG.md", "rules.md", "Gitプロジェクト一覧.md", "Patient-information.md"]:
+        if filename in [
+            "README.md",
+            "CHANGELOG.md",
+            "rules.md",
+            "Gitプロジェクト一覧.md",
+            "Patient-information.md",
+        ]:
             continue
-            
+
         print(f"Converting {filename}...")
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 md_text = f.read()
-                
+
             title, description, sections, metadata = parse_markdown_to_sections(md_text)
             content_html = generate_sections_html(title, description, sections)
-            
+
             # print_consent が "false" の場合は、署名欄を出力せず空にする
             if metadata.get("print_consent", "true").lower() == "false":
                 print_consent_html = ""
             else:
                 print_consent_html = generate_print_consent_html(title, metadata)
-            
+
             # メタデータコメント文字列の生成
             meta_comments_lines = [
                 "<!--",
@@ -1243,30 +1319,30 @@ def convert_all_markdowns(target_names=None):
                 f"  Meta:version: {metadata.get('version', '')}",
                 f"  Meta:build_datetime: {metadata.get('build_datetime', '')}",
                 f"  Meta:images: {metadata.get('images', '')}",
-                "-->"
+                "-->",
             ]
             meta_comments_str = "\n".join(meta_comments_lines)
-            
+
             # HTMLベーステンプレートに流し込む
             final_html = html_template.format(
-                title=title, 
-                content=content_html, 
+                title=title,
+                content=content_html,
                 print_consent=print_consent_html,
-                meta_comments=meta_comments_str
+                meta_comments=meta_comments_str,
             )
-            
+
             # 出力ファイル名を作成 (.md から .html)
             out_filename = os.path.splitext(filename)[0] + ".html"
             out_filepath = os.path.join(html_dir, out_filename)
-            
-            with open(out_filepath, 'w', encoding='utf-8') as out_f:
+
+            with open(out_filepath, "w", encoding="utf-8") as out_f:
                 out_f.write(final_html)
-                
+
             success_count += 1
         except Exception as e:
             print(f"ERROR converting {filename}: {e}")
             error_files.append((filename, str(e)))
-            
+
     print("\n=== Conversion Result ===")
     print(f"Successfully converted: {success_count} files.")
     if error_files:
@@ -1274,8 +1350,11 @@ def convert_all_markdowns(target_names=None):
         for name, err in error_files:
             print(f" - {name}: {err}")
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="患者説明文書MarkdownをHTMLに変換します。")
+    parser = argparse.ArgumentParser(
+        description="患者説明文書MarkdownをHTMLに変換します。"
+    )
     parser.add_argument(
         "targets",
         nargs="*",
