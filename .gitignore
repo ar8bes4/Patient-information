@@ -22,3 +22,9 @@ Thumbs.db
 .idea/
 
 .agents
+
+# Document & Presentation binaries
+docx/
+pptx/
+*.inspect.ndjson
+

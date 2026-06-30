@@ -96,13 +96,19 @@ updated: "YYYY-MM-DD"
 
 ## HTML 生成手順
 
-ローカルで HTML を再生成する場合は、リポジトリ直下で以下を実行します。
+ローカルで HTML を再生成する場合は、リポジトリ直下で対象 Markdown を必ず指定して実行します。
 
 ```bash
-python generate_html.py
+python generate_html.py 対象ファイル名.md
 ```
 
-実行後、`src/*.md` に対応する HTML が `HTML/` に出力されます。
+例:
+
+```bash
+python generate_html.py 好酸球性副鼻腔炎_ESS説明書.md
+```
+
+実行後、指定した `src/*.md` に対応する HTML が `HTML/` に出力されます。対象ファイルを省略した一括生成は行いません。
 
 生成 HTML には、以下の表示モードが含まれます。
 
@@ -117,7 +123,7 @@ python generate_html.py
 1. Obsidian 側の根拠メモ、既存 Markdown、必要なガイドラインを確認する。
 2. `src/*.md` の本文とフロントマターを更新する。
 3. 禁忌、合併症、受診目安、フォロー方針の抜けがないか確認する。
-4. `python generate_html.py` で HTML を再生成する。
+4. `python generate_html.py 対象ファイル名.md` で HTML を再生成する。
 5. 画面表示と印刷表示を確認する。
 6. 医師レビュー後、`reviewed_by`、`review_date`、`status` を更新する。
 7. Markdown、HTML、変更履歴を同じ世代として Git に記録する。

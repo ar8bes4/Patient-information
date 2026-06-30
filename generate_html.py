@@ -2,7 +2,6 @@
 # 患者説明文書のMarkdownをプレビュー・印刷対応のHTMLテンプレートに自動変換するスクリプト
 import os
 import re
-import glob
 import argparse
 import html
 
@@ -1268,32 +1267,60 @@ def generate_sections_html(title, description, sections):
     return "\n\n".join(html_blocks)
 
 
-# メイン処理：Markdownファイルの一括変換
-def convert_all_markdowns(target_names=None):
-    md_files = glob.glob(os.path.join(base_dir, "src", "*.md"))
-    if target_names:
-        normalized_targets = {
-            name if name.endswith(".md") else f"{name}.md" for name in target_names
-        }
-        md_files = [
-            path for path in md_files if os.path.basename(path) in normalized_targets
-        ]
+# メイン処理：明示されたMarkdownファイルのみ変換
+def convert_all_markdowns(target_names):
+    if not target_names:
+        print("ERROR: 変換するMarkdownファイルを1つ以上指定してください。")
+        return 1
+
+    excluded_filenames = {
+        "README.md",
+        "CHANGELOG.md",
+        "rules.md",
+        "Gitプロジェクト一覧.md",
+        "Patient-information.md",
+    }
+    normalized_targets = []
+    seen_targets = set()
+    for target_name in target_names:
+        filename = os.path.basename(target_name)
+        if not filename.endswith(".md"):
+            filename = f"{filename}.md"
+        if filename not in seen_targets:
+            normalized_targets.append(filename)
+            seen_targets.add(filename)
+
+    excluded_targets = [
+        filename for filename in normalized_targets if filename in excluded_filenames
+    ]
+    if excluded_targets:
+        print("ERROR: 以下のファイルはHTML変換対象外です。")
+        for filename in excluded_targets:
+            print(f" - {filename}")
+        return 1
+
+    md_files = []
+    missing_targets = []
+    for filename in normalized_targets:
+        filepath = os.path.join(base_dir, "src", filename)
+        if os.path.exists(filepath):
+            md_files.append(filepath)
+        else:
+            missing_targets.append(filename)
+
+    if missing_targets:
+        print("ERROR: 以下のMarkdownファイルがsrc配下に見つかりません。")
+        for filename in missing_targets:
+            print(f" - {filename}")
+        return 1
+
     success_count = 0
     error_files = []
 
-    print(f"Total markdown files found: {len(md_files)}")
+    print(f"Total target markdown files: {len(md_files)}")
 
     for filepath in md_files:
         filename = os.path.basename(filepath)
-        # 索引ファイルやrules.md等は変換対象から除外
-        if filename in [
-            "README.md",
-            "CHANGELOG.md",
-            "rules.md",
-            "Gitプロジェクト一覧.md",
-            "Patient-information.md",
-        ]:
-            continue
 
         print(f"Converting {filename}...")
         try:
@@ -1349,6 +1376,9 @@ def convert_all_markdowns(target_names=None):
         print(f"Failed to convert: {len(error_files)} files.")
         for name, err in error_files:
             print(f" - {name}: {err}")
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
@@ -1357,8 +1387,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "targets",
-        nargs="*",
-        help="変換するMarkdownファイル名。省略時はsrc配下の全Markdownを変換します。",
+        nargs="+",
+        help="変換するMarkdownファイル名。必ず1つ以上指定してください。",
     )
     args = parser.parse_args()
-    convert_all_markdowns(args.targets)
+    raise SystemExit(convert_all_markdowns(args.targets))
