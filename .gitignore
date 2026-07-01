@@ -26,5 +26,6 @@ Thumbs.db
 # Document & Presentation binaries
 docx/
 pptx/
+PDF/
 *.inspect.ndjson
 
