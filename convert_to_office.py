@@ -27,6 +27,10 @@ def parse_markdown(filepath):
         if not stripped:
             continue
             
+        # テンプレートタグ（{{slide_summary: ...}} や {{visual: ...}} など）を除外
+        if stripped.startswith('{{') and stripped.endswith('}}'):
+            continue
+            
         # 見出し判定
         if stripped.startswith('# '):
             parsed.append(('h1', stripped[2:]))

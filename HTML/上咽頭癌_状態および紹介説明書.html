@@ -6,13 +6,13 @@
   <!--
   Meta:reviewed_by: 未確認
   Meta:review_date: 
-  Meta:evidence_source: 好酸球性副鼻腔炎_ESS_改訂ソース_20260621
-  Meta:change_reason: 新規作成：術後ケアの重要性と、合併症・注意点（鼻かみ禁止等）の平易な説明の追加
+  Meta:evidence_source: 上咽頭癌_生検SCC_大学紹介_改訂ソース_20260702.md
+  Meta:change_reason: 新規作成
   Meta:version: 0.1.0
-  Meta:build_datetime: 2026-07-02 17:36:27
+  Meta:build_datetime: 2026-07-02 17:22:01
   Meta:images: 
 -->
-  <title>好酸球性副鼻腔炎に対する内視鏡下副鼻腔手術(ESS)の説明書</title>
+  <title>上咽頭の腫瘍（扁平上皮癌）の検査結果とご紹介についてのご説明</title>
   <style id="screen-css">
     :root {
       --ink: #1f2933;
@@ -275,7 +275,51 @@
     .check-list li { padding-left: 0; }
     .check-list li::before { display: none; }
   </style>
+  <style id="print-infographic-css" media="not all">
+    @page { size: A4; margin: 8mm 8mm 8mm; }
+    * { box-shadow: none !important; text-shadow: none !important; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #ffffff !important; color: #111111;
+      font-family: var(--font);
+      font-size: 10pt; line-height: 1.25;
+    }
+    .document, article { width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }
 
+    .section-block { break-inside: avoid; page-break-inside: avoid; padding: 0 0 3mm; border: 0; border-bottom: 0.5pt dashed #cccccc; }
+    .section-block:last-child { border-bottom: 0; }
+    .doc-cover { padding-top: 0; background: #ffffff; }
+    .eyebrow { margin: 0 0 1mm; font-size: 8.5pt; font-weight: 700; color: var(--accent-strong); }
+    h1, h2, h3 { break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.15; }
+    h1 { margin: 0 0 2mm; font-size: 16pt; }
+    h2 { margin: 0 0 1.5mm; padding: 0 0 0.5mm; border: 0; border-left: 3.5pt solid #111111; padding-left: 6px; font-size: 11pt; }
+    h3 { margin: 0 0 1mm; font-size: 9.5pt; }
+    p, ul, ol, dl { margin-top: 0; margin-bottom: 1.5mm; }
+    ul, ol { padding-left: 1.2em; }
+    li { margin: 0.5mm 0; }
+    a { color: #111111; text-decoration: none; }
+    .lead { font-size: 10pt; margin-top: 1mm; margin-bottom: 2mm; }
+    .note, .urgent {
+      break-inside: avoid; page-break-inside: avoid; padding: 1.5mm;
+      border: 0.8pt solid #333333; background: #ffffff !important;
+      font-size: 9pt; margin-bottom: 1.5mm;
+    }
+    .step-list, .risk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5mm; margin-bottom: 1.5mm; }
+    .step-list section, .risk-grid section {
+      break-inside: avoid; page-break-inside: avoid; padding: 1.5mm;
+      border: 0.5pt solid #666666; background: #ffffff !important;
+      font-size: 9pt;
+    }
+    .check-list { list-style: square; padding-left: 1.2em; }
+    .check-list li { padding-left: 0; }
+    .check-list li::before { display: none; }
+
+    .section-layout { display: grid; grid-template-columns: minmax(0, 1fr) 32mm; gap: 3mm; align-items: start; }
+    .section-visual { min-height: 22mm; padding: 1mm; border: 0.5pt solid #aaaaaa; background: #ffffff !important; }
+    .section-visual svg { max-width: 30mm; }
+    .section-visual img { max-width: 30mm; }
+    .section-visual figcaption { font-size: 7.5pt; margin-top: 3px; }
+  </style>
   <style id="slides-css" media="not all">
     body[data-mode="slides"] { overflow: hidden; background: #0b1329; }
     body[data-mode="slides"] .app-toolbar {
@@ -452,11 +496,12 @@
 </head>
 <body>
   <header class="app-toolbar" aria-label="表示切り替え">
-    <div class="toolbar-title">好酸球性副鼻腔炎に対する内視鏡下副鼻腔手術(ESS)の説明書</div>
+    <div class="toolbar-title">上咽頭の腫瘍（扁平上皮癌）の検査結果とご紹介についてのご説明</div>
     <div class="toolbar-actions">
       <button type="button" data-mode="screen" aria-pressed="true">画面</button>
       <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
       <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
+      <button type="button" data-mode="infographic" aria-pressed="false">A4チラシ</button>
       <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
       <button type="button" data-action="print">印刷/PDF</button>
     </div>
@@ -468,13 +513,10 @@
         <div class="section-layout">
           <div class="section-text">
             <p class="eyebrow">患者さん・ご家族への説明資料</p>
-            <h1>好酸球性副鼻腔炎に対する内視鏡下副鼻腔手術(ESS)の説明書</h1>
+            <h1>上咽頭の腫瘍（扁平上皮癌）の検査結果とご紹介についてのご説明</h1>
 
         <p>
-          この説明書は、好酸球性副鼻腔炎に罹患されており、内視鏡下副鼻腔手術（ESS）を受けられる患者さんとご家族に対し、手術の目的、内容、合併症、および術後ケアについて分かりやすくご説明するためのものです。
-        </p>
-        <p>
-          ---
+          鼻の奥（上咽頭）の生検（組織検査）および当院で行った画像検査の結果と、今後の高次医療機関（大学病院）へのご紹介・治療の流れについてご説明いたします。
         </p>
 
           </div>
@@ -487,21 +529,14 @@
       <section class="section-block has-slide-summary">
         <div class="section-layout">
           <div class="section-text">
-      <h2>1. 疾患と手術の目的について</h2>
-        <p>
-          <strong>好酸球性副鼻腔炎</strong>は、鼻の粘膜にアレルギー性の強い炎症が起こり、両側の鼻の中に「鼻ポリープ（鼻タケ）」が多発する難治性の副鼻腔炎です。この病気は<strong>再発率が非常に高い</strong>ことが知られています。
-        </p>
-        <p>
-          そのため、手術の目的は病気を完全に治しきること（根治）ではなく、以下の2点にあります。
-        </p>
-        <ol>
-          <li>鼻ポリープなどを取り除き、<strong>鼻の通気を改善する</strong>こと。</li>
-          <li>副鼻腔の空気の通り道を広く開放し、手術後の<strong>点鼻薬や鼻洗浄が奥までしっかりと行き渡るようにする</strong>こと。</li>
-        </ol>
-        <p>
-          ---
-        </p>
-            <p class="slide-summary">手術は根治ではなく、術後の自己ケア（点鼻・鼻洗浄）を効果的に行うための通路確保が目的です。</p>
+      <h2>1. 現在の診断と検査結果</h2>
+        <ul>
+          <li><strong>生検結果（組織検査）</strong>: 先日行った鼻の奥（上咽頭）の組織検査において、「扁平上皮癌（へんぺいじょうひがん）」という悪性腫瘍（がん）の細胞が検出されました。なお、このがんと関連することが多い「EBウイルス（エプスタイン・バーウイルス）」の検査は陰性（関連がないタイプ）でした。</li>
+          <li><strong>画像検査所見</strong>: CTやMRIなどの検査において、がんの発生元である上咽頭（鼻の奥）には、はっきりとした大きな腫瘍の塊（粗大な腫瘤）は描出されていません。局所のがんの広がりは比較的小さい段階（T1相当）と考えられます。</li>
+          <li><strong>PET検査所見</strong>: 全身の細胞の活動性を調べるPET検査において、首のリンパ節（一部に液体がたまっている「嚢胞変性」という変化が見られるもの）の周囲（辺縁）に、がんの転移を強く疑わせる反応（N1相当）が認められました。</li>
+          <li><strong>現在の推測病期（ステージ）</strong>: 以上の所見から、当院では暫定的に「上咽頭癌（cT1N1M0、Stage II相当）」と推測されます。</li>
+        </ul>
+            <p class="slide-summary">組織検査で上咽頭の扁平上皮癌（EBV陰性）が判明。画像上、原発巣は大きくありませんが、首のリンパ節転移（N1）が疑われます。</p>
           </div>
           <div class="section-visual" aria-hidden="true">
 
@@ -509,53 +544,57 @@
         </div>
       </section>
 
-      <section class="section-block">
+      <section class="section-block has-slide-summary">
         <div class="section-layout">
           <div class="section-text">
-      <h2>2. 術後セルフケアの重要性（再発予防）</h2>
+      <h2>2. 今後の治療方針決定とご紹介の目的</h2>
+        <ul>
+          <li><strong>高次医療機関（大学病院）への紹介</strong>: がんの正確な広がり（粘膜の下の進展や微小な転移など）の最終的な確認と、詳細な治療方針（抗がん剤治療を組み合わせるかどうか、どのくらいの強さで行うかなど）を決定するため、専門の設備と頭頸部腫瘍の専門医師が揃う<strong>〇〇大学病院の頭頸部腫瘍外来</strong>へご紹介いたします。</li>
+          <li><strong>情報の引き継ぎ</strong>: 当院での画像検査データ（CD-R）、生検の病理組織レポート、血液検査結果などの情報は、すべて紹介状（診療情報提供書）に添付してお渡しします。</li>
+          <li><strong>大学病院での治療</strong>: 大学病院での詳しい検査結果をもとに、大学病院の専門医の意見を仰ぎ、そのまま大学病院にて治療を開始していただくのが最も望ましく、安全な選択肢と考えられます。</li>
+        </ul>
+            <p class="slide-summary">がんの正確な進展範囲と治療強度の最終判断のため、大学病院の頭頸部腫瘍外来へ紹介します。画像や生検データは紹介状に添付します。</p>
+          </div>
+          <div class="section-visual" aria-hidden="true">
+
+          </div>
+        </div>
+      </section>
+
+      <section class="section-block has-slide-summary">
+        <div class="section-layout">
+          <div class="section-text">
+      <h2>3. 一般的に想定される治療（化学放射線療法など）</h2>
         <p>
-          手術が終わった後も、粘膜の炎症体質は残ります。良好な状態を維持し再発を防ぐため、ご自宅での<strong>継続的な治療（セルフケア）が最も重要</strong>となります。
+          上咽頭がんは放射線治療が非常によく効く特徴があります。高次病院において、一般的には以下のような治療が提案されることが予想されます。
         </p>
         <ul>
-          <li><strong>鼻洗浄（ハナクリーンなど）</strong>: 毎日の温生理食塩水による鼻洗浄により、鼻の中の粘液やアレルギー物質を洗い流します。</li>
-          <li><strong>ステロイド点鼻薬</strong>: 医師から処方された点鼻薬を、指示通り毎日使用してください。手術によって通り道が広くなっているため、薬が非常に効きやすくなっています。</li>
+          <li><strong>治療方法の基本</strong>: 放射線治療に抗がん剤（シスプラチンなど）の点滴を併用する「化学放射線療法」が標準的です。患者さんの年齢や持病などの全身状態によっては、「放射線治療単独」で行われることもあります。</li>
         </ul>
         <p>
-          ---
+          ※具体的な治療スケジュール（治療の期間や回数、点滴や入院の必要性など）は、患者さんの全身状態等に合わせて紹介先の大学病院で最終決定され、担当医より直接ご説明があります。
         </p>
-
+            <p class="slide-summary">上咽頭がんは放射線が効果的で、通常は抗がん剤を併用する化学放射線療法を行います。具体的な治療スケジュールは紹介先で決定します。</p>
           </div>
           <div class="section-visual" aria-hidden="true">
-<figure>
-  <img src="../images/draft/sinusitis-follow-up.png" alt="術後の定期通院と鼻洗浄による自宅療養">
-  <figcaption>術後の定期通院と鼻洗浄による自宅療養<br>※AI生成ドラフト。臨床使用前に医師の確認が必要です。</figcaption>
-</figure>
+
           </div>
         </div>
       </section>
 
-      <section class="section-block">
+      <section class="section-block has-slide-summary">
         <div class="section-layout">
           <div class="section-text">
-      <h2>3. 手術に伴う合併症について</h2>
+      <h2>4. 代表的な副作用と対策</h2>
         <p>
-          手術は全身麻酔下で、内視鏡を用いて鼻の穴の中から行います（顔の表面に傷はつきません）。細心の注意を払って行いますが、鼻の周囲には目や脳を隔てる薄い骨の壁があるため、以下のような合併症が極めて稀に（数％以下）起こる可能性があります。
-        </p>
-        <h3>① 目の周囲の組織（血管や神経）のキズ</h3>
-        <p>
-          副鼻腔の外側は、目を容れている骨のくぼみ（眼窩）に接しています。この薄い壁や周囲が損傷すると、目の周りが出血で腫れたり、物が二重に見えたり（複視）、非常に稀ですが視力に影響が出ることがあります。
-        </p>
-        <h3>② 脳を保護する膜のキズと髄液の漏れ（髄液漏）</h3>
-        <p>
-          副鼻腔の天井は、脳と薄い骨一枚で隔てられています。この骨や脳を包む膜にキズがつくと、脳の周囲を満たしている「髄液（ずいえき）」という透明な水が、鼻の中に漏れ出てくることがあります。
+          治療中に予想される主な副作用は、紹介先で詳細な説明がありますが、代表的なものは以下の通りです。
         </p>
         <ul>
-          <li><strong>特徴</strong>: 鼻水とは異なり、さらさらとした透明な水のような液体で、下を向いたときにポタポタと絶え間なく落ちてきます。このような症状がある場合は、直ちに医師へ連絡してください。</li>
+          <li><strong>のどの痛み・口内炎</strong>: 放射線や抗がん剤の影響でのどの粘膜が荒れ、強い痛みが生じます。こまめなうがいや、医師から処方される痛み止めを適切に服用することで和らげます。</li>
+          <li><strong>食欲低下・飲み込みにくさ</strong>: のどの痛みや、吐き気、味覚の変化によって食事制限や偏り、痛みのために食事が摂りにくくなります。栄養補助食品の活用や、喉ごしがよく食べやすいものを摂る工夫をします。</li>
+          <li><strong>口の渇き（口腔乾燥）</strong>: 唾液を作る腺（唾液腺）に放射線が当たることで唾液が出にくくなります。うがいやこまめな水分摂取で口の潤いを保ちます。</li>
         </ul>
-        <p>
-          ---
-        </p>
-
+            <p class="slide-summary">主な副作用は、のどの痛み、食欲低下、口の渇きです。うがいや痛み止めの服用、食事の工夫で対処します。</p>
           </div>
           <div class="section-visual" aria-hidden="true">
 
@@ -563,18 +602,47 @@
         </div>
       </section>
 
-      <section class="section-block">
+      <section class="section-block has-slide-summary">
         <div class="section-layout">
           <div class="section-text">
-      <h2>4. 術後の日常生活での注意点（重要）</h2>
-        <p>
-          手術後の鼻の中はデリケートで、傷口が完全にふさがるまでには約1ヶ月かかります。
-        </p>
-        <div class="note urgent">
-          <p><strong>術後1ヶ月間は、絶対に強く鼻をかまないでください。</strong></p>
-          <p>手術により鼻と目の周りを仕切る骨が薄くなっているため、強くかむと鼻の中の空気が目の周囲の隙間に押し込まれ、目が急激に腫れ上がる原因（眼窩気腫）になります。鼻水が出るときは、すする程度にとどめるか、ティッシュで軽く押さえるようにしてください。</p>
-        </div>
+      <h2>5. 生活上の注意点（一般的なアドバイス）</h2>
+        <ul>
+          <li><strong>栄養摂取の工夫</strong>: のどの痛みが強くなると食事が摂りにくくなります。痛みが出る前から、高栄養で喉ごしの良い食事（ゼリー、スープ、お粥、栄養補助飲料など）を摂り、体重や体力を維持するよう心がけてください。</li>
+          <li><strong>清潔保持</strong>: 放射線が当たる首の皮膚は非常にデリケートになります。こすったり刺激の強い石鹸を使ったりせず、優しく洗い、保湿を心がけてください。また、感染症や口内炎の悪化を防ぐため、うがいや優しい歯磨きで口の中を清潔に保つようにしてください。</li>
+        </ul>
+            <p class="slide-summary">体力維持のために栄養価が高く喉ごしの良い食事を工夫し、首の皮膚の保湿や口腔ケアで清潔を保ってください。</p>
+          </div>
+          <div class="section-visual" aria-hidden="true">
 
+          </div>
+        </div>
+      </section>
+
+      <section class="section-block has-slide-summary">
+        <div class="section-layout">
+          <div class="section-text">
+      <h2>6. 代替治療および治療を行わなかった場合の自然経過</h2>
+        <ul>
+          <li><strong>手術が第一選択とならない理由</strong>: 上咽頭（鼻の奥）は頭の骨（頭蓋骨）のすぐ下にあり、周囲を重要な脳神経や太い血管に囲まれた極めて複雑な場所です。そのため、手術で安全に腫瘍を取り切ることが技術的に困難であり、手術による切除は標準治療にはなりません。放射線治療を主体とした治療が最も効果的で安全です。</li>
+          <li><strong>治療を行わなかった場合（自然経過）</strong>: 治療を行わずに放置した場合、がんは確実に進行します。首のリンパ節転移が大きくなって外から見えるほど腫れるだけでなく、がんが周囲の脳神経に侵入し、「ものが二重に見える（複視）」「顔の感覚が麻痺する」「のどや耳に激しい痛みが走る」といった深刻な症状が現れます。最終的には全身へ転移が広がり、生命に深刻な影響を及ぼします。</li>
+        </ul>
+            <p class="slide-summary">解剖学的に手術での切除は困難なため、放射線が中心となります。治療を行わないと、がんが進行し、脳神経麻痺などの重篤な症状や生命の危険が生じます。</p>
+          </div>
+          <div class="section-visual" aria-hidden="true">
+
+          </div>
+        </div>
+      </section>
+
+      <section class="section-block has-slide-summary">
+        <div class="section-layout">
+          <div class="section-text">
+      <h2>7. 要約</h2>
+        <p>
+          当院での生検・画像検査の結果、上咽頭に扁平上皮癌が認められ、首のリンパ節への転移が疑われます。がんの正確な進展範囲の評価と、最も適した治療の強さ（化学療法の併用など）を決定するため、当院の検査データをすべて添付の上、専門の高次医療機関である大学病院の頭頸部腫瘍外来へご紹介いたします。
+          大学病院での精密検査結果に基づき、そのまま大学病院で安全かつ確実な治療を受けていただくことを強くお勧めいたします。
+        </p>
+            <p class="slide-summary">当院での生検等で上咽頭癌（リンパ節転移疑い）が判明。詳細な診断と治療方針決定、治療実施のため、画像等のデータを添付して大学病院へご紹介します。</p>
           </div>
           <div class="section-visual" aria-hidden="true">
 
@@ -593,6 +661,7 @@
   <script>
     const printLarge = document.getElementById("print-large-css");
     const printCompact = document.getElementById("print-compact-css");
+    const printInfographic = document.getElementById("print-infographic-css");
     const slides = document.getElementById("slides-css");
     const buttons = document.querySelectorAll("[data-mode]");
     const documentFrame = document.querySelector(".document");
@@ -605,6 +674,7 @@
       document.body.dataset.mode = mode;
       printLarge.media = mode === "large" ? "all" : (mode === "screen" || mode === "slides" ? "print" : "not all");
       printCompact.media = mode === "compact" ? "all" : "not all";
+      printInfographic.media = mode === "infographic" ? "all" : "not all";
       slides.media = mode === "slides" ? "screen" : "not all";
       buttons.forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.mode === mode));

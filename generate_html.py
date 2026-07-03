@@ -4,6 +4,8 @@ import os
 import re
 import argparse
 import html
+import base64
+import mimetypes
 
 # パス設定
 base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
@@ -133,7 +135,6 @@ html_template = """<!doctype html>
     }}
     .urgent {{ border-left: 7px solid var(--urgent); background: var(--urgent-bg); }}
     .urgent h2 {{ border-left-color: var(--urgent); }}
-    .print-consent {{ display: none; }}
     .section-layout {{
       display: grid;
       grid-template-columns: minmax(0, 1fr) 220px;
@@ -200,18 +201,6 @@ html_template = """<!doctype html>
       font-size: 16pt; line-height: 1.55;
     }}
     .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
-    .print-consent {{ display: block; break-after: page; page-break-after: always; padding: 0 0 7mm; }}
-    .print-consent h1 {{ margin: 0 0 5mm; font-size: 24pt; text-align: center; }}
-    .consent-meta-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin: 0 0 5mm; }}
-    .consent-field {{ min-height: 12mm; padding: 2.5mm; border: 1pt solid #333333; }}
-    .consent-label {{ display: block; margin-bottom: 1mm; font-size: 10.5pt; font-weight: 700; }}
-    .consent-summary {{ margin: 0 0 5mm; padding: 3mm; border: 1pt solid #333333; }}
-    .consent-summary h2 {{ margin: 0 0 2mm; padding: 0; border: 0; font-size: 15pt; }}
-    .consent-summary ul {{ margin-bottom: 0; }}
-    .signature-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 5mm; }}
-    .signature-box {{ min-height: 28mm; padding: 3mm; border: 1pt solid #333333; }}
-    .signature-line {{ margin-top: 8mm; border-bottom: 1pt solid #333333; height: 8mm; }}
-    .print-note {{ margin-top: 4mm; font-size: 10.5pt; }}
     
     /* 改ページ制御の最適化: セクション全体のbreak-insideを解除し、子要素と見出し泣き別れを制御 */
     .section-block {{ break-inside: auto; page-break-inside: auto; padding: 0 0 7mm; border: 0; }}
@@ -256,18 +245,6 @@ html_template = """<!doctype html>
       font-size: 10.8pt; line-height: 1.28;
     }}
     .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
-    .print-consent {{ display: block; break-after: page; page-break-after: always; padding: 0 0 4mm; }}
-    .print-consent h1 {{ margin: 0 0 3mm; font-size: 17pt; text-align: center; }}
-    .consent-meta-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin: 0 0 3mm; }}
-    .consent-field {{ min-height: 9mm; padding: 1.8mm; border: 0.8pt solid #333333; }}
-    .consent-label {{ display: block; margin-bottom: 0.8mm; font-size: 8.5pt; font-weight: 700; }}
-    .consent-summary {{ margin: 0 0 3mm; padding: 2mm; border: 0.8pt solid #333333; }}
-    .consent-summary h2 {{ margin: 0 0 1mm; padding: 0; border: 0; font-size: 11.5pt; }}
-    .consent-summary ul {{ margin-bottom: 0; }}
-    .signature-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 3mm; }}
-    .signature-box {{ min-height: 20mm; padding: 2mm; border: 0.8pt solid #333333; }}
-    .signature-line {{ margin-top: 5mm; border-bottom: 0.8pt solid #333333; height: 6mm; }}
-    .print-note {{ margin-top: 2mm; font-size: 8.5pt; }}
     
     /* 改ページ制御の最適化: セクション全体のbreak-insideを解除し、子要素と見出し泣き別れを制御 */
     .section-block {{ break-inside: auto; page-break-inside: auto; padding: 0 0 4mm; border: 0; }}
@@ -309,61 +286,7 @@ html_template = """<!doctype html>
     .check-list li {{ padding-left: 0; }}
     .check-list li::before {{ display: none; }}
   </style>
-  <style id="print-infographic-css" media="not all">
-    @page {{ size: A4; margin: 8mm 8mm 8mm; }}
-    * {{ box-shadow: none !important; text-shadow: none !important; }}
-    html, body {{
-      margin: 0; padding: 0;
-      background: #ffffff !important; color: #111111;
-      font-family: var(--font);
-      font-size: 10pt; line-height: 1.25;
-    }}
-    .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
-    .print-consent {{ display: block; padding: 0 0 3mm; border-bottom: 1pt solid #111111; margin-bottom: 4mm; }}
-    .print-consent h1 {{ margin: 0 0 2mm; font-size: 15pt; text-align: center; }}
-    .consent-meta-grid {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5mm; margin-top: 2mm; }}
-    .consent-field {{ min-height: 8mm; padding: 1mm; border: 0.5pt solid #333333; font-size: 8pt; }}
-    .consent-label {{ display: block; margin-bottom: 0.5mm; font-size: 7pt; font-weight: 700; }}
-    .consent-summary {{ display: none; }} /* A4チラシでは説明本文と重複するため同意欄のサマリーは非表示 */
-    .signature-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 3mm; }}
-    .signature-box {{ min-height: 15mm; padding: 1.5mm; border: 0.8pt solid #333333; font-size: 8pt; }}
-    .signature-line {{ margin-top: 3mm; border-bottom: 0.8pt solid #333333; height: 4mm; }}
-    .print-note {{ margin-top: 1mm; font-size: 7.5pt; }}
 
-    .section-block {{ break-inside: avoid; page-break-inside: avoid; padding: 0 0 3mm; border: 0; border-bottom: 0.5pt dashed #cccccc; }}
-    .section-block:last-child {{ border-bottom: 0; }}
-    .doc-cover {{ padding-top: 0; background: #ffffff; }}
-    .eyebrow {{ margin: 0 0 1mm; font-size: 8.5pt; font-weight: 700; color: var(--accent-strong); }}
-    h1, h2, h3 {{ break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.15; }}
-    h1 {{ margin: 0 0 2mm; font-size: 16pt; }}
-    h2 {{ margin: 0 0 1.5mm; padding: 0 0 0.5mm; border: 0; border-left: 3.5pt solid #111111; padding-left: 6px; font-size: 11pt; }}
-    h3 {{ margin: 0 0 1mm; font-size: 9.5pt; }}
-    p, ul, ol, dl {{ margin-top: 0; margin-bottom: 1.5mm; }}
-    ul, ol {{ padding-left: 1.2em; }}
-    li {{ margin: 0.5mm 0; }}
-    a {{ color: #111111; text-decoration: none; }}
-    .lead {{ font-size: 10pt; margin-top: 1mm; margin-bottom: 2mm; }}
-    .note, .urgent {{
-      break-inside: avoid; page-break-inside: avoid; padding: 1.5mm;
-      border: 0.8pt solid #333333; background: #ffffff !important;
-      font-size: 9pt; margin-bottom: 1.5mm;
-    }}
-    .step-list, .risk-grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5mm; margin-bottom: 1.5mm; }}
-    .step-list section, .risk-grid section {{
-      break-inside: avoid; page-break-inside: avoid; padding: 1.5mm;
-      border: 0.5pt solid #666666; background: #ffffff !important;
-      font-size: 9pt;
-    }}
-    .check-list {{ list-style: square; padding-left: 1.2em; }}
-    .check-list li {{ padding-left: 0; }}
-    .check-list li::before {{ display: none; }}
-
-    .section-layout {{ display: grid; grid-template-columns: minmax(0, 1fr) 32mm; gap: 3mm; align-items: start; }}
-    .section-visual {{ min-height: 22mm; padding: 1mm; border: 0.5pt solid #aaaaaa; background: #ffffff !important; }}
-    .section-visual svg {{ max-width: 30mm; }}
-    .section-visual img {{ max-width: 30mm; }}
-    .section-visual figcaption {{ font-size: 7.5pt; margin-top: 3px; }}
-  </style>
   <style id="slides-css" media="not all">
     body[data-mode="slides"] {{ overflow: hidden; background: #0b1329; }}
     body[data-mode="slides"] .app-toolbar {{
@@ -428,7 +351,6 @@ html_template = """<!doctype html>
     body[data-mode="slides"] .doc-cover {{
       background: linear-gradient(135deg, #e6fffa 0%, #e0f2fe 100%);
     }}
-    body[data-mode="slides"] .print-consent {{ display: none !important; }}
     body[data-mode="slides"] h1 {{
       max-width: 1100px;
       font-size: clamp(38px, 5.2vw, 68px);
@@ -546,7 +468,6 @@ html_template = """<!doctype html>
       <button type="button" data-mode="screen" aria-pressed="true">画面</button>
       <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
       <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
-      <button type="button" data-mode="infographic" aria-pressed="false">A4チラシ</button>
       <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
       <button type="button" data-action="print">印刷/PDF</button>
     </div>
@@ -554,7 +475,6 @@ html_template = """<!doctype html>
 
   <main class="document" id="top">
     <article>
-{print_consent}
 {content}
     </article>
   </main>
@@ -568,7 +488,6 @@ html_template = """<!doctype html>
   <script>
     const printLarge = document.getElementById("print-large-css");
     const printCompact = document.getElementById("print-compact-css");
-    const printInfographic = document.getElementById("print-infographic-css");
     const slides = document.getElementById("slides-css");
     const buttons = document.querySelectorAll("[data-mode]");
     const documentFrame = document.querySelector(".document");
@@ -581,7 +500,6 @@ html_template = """<!doctype html>
       document.body.dataset.mode = mode;
       printLarge.media = mode === "large" ? "all" : (mode === "screen" || mode === "slides" ? "print" : "not all");
       printCompact.media = mode === "compact" ? "all" : "not all";
-      printInfographic.media = mode === "infographic" ? "all" : "not all";
       slides.media = mode === "slides" ? "screen" : "not all";
       buttons.forEach((button) => {{
         button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
@@ -811,14 +729,14 @@ def parse_markdown_to_sections(md_text):
             continue
 
         visual_match = re.match(
-            r"^\{\{visual:\s*([a-zA-Z0-9_-]+)\s*\}\}$", cleaned_line
+            r"^(?:>\s*)?\{\{visual:\s*([a-zA-Z0-9_-]+)\s*\}\}$", cleaned_line
         )
         if visual_match:
             current_section_visual_key = visual_match.group(1)
             continue
 
         slide_summary_match = re.match(
-            r"^\{\{slide_summary:\s*(.*?)\s*\}\}$", cleaned_line
+            r"^(?:>\s*)?\{\{slide_summary:\s*(.*?)\s*\}\}$", cleaned_line
         )
         if slide_summary_match:
             current_section_slide_summary = format_inline_elements(
@@ -977,8 +895,26 @@ def format_inline_elements(text):
     return text
 
 
-def section_visual_svg(visual_key):
-    """Markdownで指定された図版キーに対応する説明用模式図を返す。"""
+def get_doc_category(title, metadata):
+    """文書のタイトルやメタデータから疾患カテゴリを自動判定する。"""
+    title_str = (
+        ((title or "") + " " + (metadata.get("diagnosis") or "") + " " + (metadata.get("procedure_name") or ""))
+        .lower()
+    )
+    if any(kw in title_str for kw in ["真珠腫", "cholesteatoma", "中耳", "鼓室"]):
+        return "cholesteatoma"
+    elif any(kw in title_str for kw in ["副鼻腔", "sinusitis", "鼻タケ", "鼻ポリープ", "ess"]):
+        return "sinusitis"
+    else:
+        return "general"
+
+
+def section_visual_svg(visual_key, category):
+    """Markdownで指定された図版キーとカテゴリに対応する説明用模式図（内蔵SVG）を返す。"""
+    if category != "cholesteatoma":
+        # 真珠腫関連以外の文書では真珠腫のSVGフォールバックを行わない
+        return ""
+
     visuals = {
         "cover": """<svg viewBox="0 0 360 260" role="img" aria-label="耳の構造と真珠腫説明資料の表紙図">
   <rect width="360" height="260" rx="18" fill="#ffffff"/>
@@ -1107,117 +1043,146 @@ def section_visual_svg(visual_key):
     return visuals.get(visual_key, "")
 
 
-def section_visual_html(visual_key):
-    """図版キーに対応するドラフト画像を返す。画像は医師レビュー前のサンプル扱い。"""
-    visuals = {
-        "cover": ("cholesteatoma-growth.png", "真珠腫が中耳で広がる位置関係の模式図"),
-        "cholesteatoma-growth": (
-            "cholesteatoma-growth.png",
-            "鼓膜の奥に真珠腫ができ、耳小骨や周囲の骨へ近づく様子",
-        ),
-        "surgery-purpose": (
-            "surgery-purpose.png",
-            "耳の後ろ側から病変へ到達し、真珠腫を取り除く考え方",
-        ),
-        "surgical-approaches": (
-            "surgery-purpose.png",
-            "真珠腫の広がりに合わせて安全な手術方法を選びます",
-        ),
-        "reconstruction": (
-            "reconstruction.png",
-            "鼓膜や耳小骨を、軟骨や筋膜で補う再建イメージ",
-        ),
-        "recurrence-types": (
-            "recurrence-types.png",
-            "遺残と再形成という2種類の再発パターン",
-        ),
-        "sniffing-pressure": (
-            "sniffing-pressure.png",
-            "鼻すすりで耳の中に陰圧がかかり、鼓膜が奥へ引かれる仕組み",
-        ),
-        "complications": (
-            "complications-risk.png",
-            "顔面神経や内耳など、真珠腫の近くにある重要な構造",
-        ),
-        "red-flags": (
-            "complications-risk.png",
-            "強いめまい、顔の動きにくさ、聞こえの急な悪化などに注意します",
-        ),
-        "follow-up": (
-            "recurrence-types.png",
-            "手術後も再発確認のため、長期間の定期通院が必要です",
-        ),
-        "child-ear-growth": (
-            "cholesteatoma-growth.png",
-            "小児では耳の成長も考えて治療方針を決めます",
-        ),
+def find_image_file(filename):
+    """指定されたファイル名に一致する画像を images 配下から再帰的に探索する。
+    優先順位: 1. optimized, 2. master, 3. draft
+    """
+    search_dirs = [
+        os.path.join(base_dir, "images", "optimized"),
+        os.path.join(base_dir, "images", "master"),
+        os.path.join(base_dir, "images", "draft")
+    ]
+    for s_dir in search_dirs:
+        if not os.path.exists(s_dir):
+            continue
+        for root, dirs, files in os.walk(s_dir):
+            if filename in files:
+                return os.path.join(root, filename)
+    return None
+
+
+def encode_image_to_base64(filepath):
+    """指定された画像ファイルをBase64エンコードしてデータURI形式で返す。"""
+    try:
+        with open(filepath, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+            mime_type, _ = mimetypes.guess_type(filepath)
+            if not mime_type:
+                mime_type = "image/png"  # フォールバック
+            return f"data:{mime_type};base64,{encoded_string}"
+    except Exception as e:
+        print(f"WARNING: Failed to encode image {filepath} to base64: {e}")
+        return None
+
+
+def get_section_visual_element(visual_key, inline=False, title="", metadata=None):
+    """図版キーに対応するビジュアル要素（HTMLマークアップ）を生成する。
+    画像が見つかった場合は img タグを（inline=True の場合はBase64化して）出力する。
+    画像が見つからない場合は、定義済みのSVGコードへフォールバックする。
+    両方ない場合は空の文字列を返す。
+    """
+    if metadata is None:
+        metadata = {}
+
+    category = get_doc_category(title, metadata)
+
+    visuals_by_category = {
+        "cholesteatoma": {
+            "cover": ("cholesteatoma-growth.png", "真珠腫が中耳で広がる位置関係の模式図"),
+            "cholesteatoma-growth": (
+                "cholesteatoma-growth.png",
+                "鼓膜の奥に真珠腫ができ、耳小骨や周囲の骨へ近づく様子",
+            ),
+            "surgery-purpose": (
+                "surgery-purpose.png",
+                "耳の後ろ側から病変へ到達し、真珠腫を取り除く考え方",
+            ),
+            "surgical-approaches": (
+                "surgery-purpose.png",
+                "真珠腫の広がりに合わせて安全な手術方法を選びます",
+            ),
+            "reconstruction": (
+                "reconstruction.png",
+                "鼓膜や耳小骨を、軟骨や筋膜で補う再建イメージ",
+            ),
+            "recurrence-types": (
+                "recurrence-types.png",
+                "遺残と再形成という2種類の再発パターン",
+            ),
+            "sniffing-pressure": (
+                "sniffing-pressure.png",
+                "鼻すすりで耳の中に陰圧がかかり、鼓膜が奥へ引かれる仕組み",
+            ),
+            "complications": (
+                "complications-risk.png",
+                "顔面神経や内耳など、真珠腫の近くにある重要な構造",
+            ),
+            "red-flags": (
+                "complications-risk.png",
+                "強いめまい、顔の動きにくさ、聞こえの急な悪化などに注意します",
+            ),
+            "follow-up": (
+                "recurrence-types.png",
+                "手術後も再発確認のため、長期間の定期通院が必要です",
+            ),
+            "child-ear-growth": (
+                "cholesteatoma-growth.png",
+                "小児では耳の成長も考えて治療方針を決めます",
+            ),
+        },
+        "sinusitis": {
+            "cover": ("sinusitis-cover.png", "副鼻腔の構造と炎症の模式図"),
+            "complications": (
+                "sinusitis-complications.png",
+                "手術時に注意すべき眼や脳など周囲の重要な構造",
+            ),
+            "red-flags": (
+                "sinusitis-red-flags.png",
+                "強い頭痛、目の見えにくさ、高熱などの注意すべき症状",
+            ),
+            "follow-up": (
+                "sinusitis-follow-up.png",
+                "術後の定期通院と鼻洗浄による自宅療養",
+            ),
+        },
+        "general": {
+            "cover": ("general-cover.png", "治療説明図"),
+        },
     }
-    item = visuals.get(visual_key)
-    if not item:
-        return ""
-    filename, caption = item
-    src = f"../images/draft/cholesteatoma/{filename}"
-    return f"""<figure>
+
+    category_map = visuals_by_category.get(category, visuals_by_category["general"])
+    item = category_map.get(visual_key)
+    if item:
+        filename, caption = item
+        filepath = find_image_file(filename)
+        if filepath:
+            if inline:
+                src = encode_image_to_base64(filepath)
+                if not src:
+                    rel_path = os.path.relpath(filepath, html_dir).replace('\\', '/')
+                    src = f"../{rel_path}"
+            else:
+                rel_path = os.path.relpath(filepath, html_dir).replace('\\', '/')
+                src = rel_path
+
+            return f"""<figure>
   <img src="{html.escape(src)}" alt="{html.escape(caption)}">
   <figcaption>{html.escape(caption)}<br>※AI生成ドラフト。臨床使用前に医師の確認が必要です。</figcaption>
 </figure>"""
 
+    # 画像が見つからなかった場合（または登録されていないキーの場合）、内蔵SVGコードへフォールバック
+    svg_code = section_visual_svg(visual_key, category)
+    if svg_code:
+        return svg_code
 
-def generate_print_consent_html(title, metadata):
-    """印刷時だけ表示する手術説明書・同意確認欄を生成する。"""
-    document_type = metadata.get("document_type") or "手術説明書・同意確認書"
-    diagnosis = metadata.get("diagnosis") or ""
-    procedure_name = metadata.get("procedure_name") or title
-    anesthesia = metadata.get("anesthesia") or ""
-    laterality = metadata.get("laterality") or "右・左"
-    version = metadata.get("version") or ""
-    updated = metadata.get("updated") or ""
-    reviewed_by = metadata.get("reviewed_by") or "未確認"
-    review_date = metadata.get("review_date") or ""
+    return ""
 
-    return f"""      <section class="print-consent" aria-label="印刷用同意確認欄">
-        <h1>{html.escape(document_type)}</h1>
-        <div class="consent-meta-grid">
-          <div class="consent-field"><span class="consent-label">文書名</span>{html.escape(title)}</div>
-          <div class="consent-field"><span class="consent-label">病名</span>{html.escape(diagnosis)}</div>
-          <div class="consent-field"><span class="consent-label">手術名</span>{html.escape(procedure_name)}</div>
-          <div class="consent-field"><span class="consent-label">麻酔</span>{html.escape(anesthesia)}</div>
-          <div class="consent-field"><span class="consent-label">術側</span>{html.escape(laterality)}</div>
-          <div class="consent-field"><span class="consent-label">手術予定日</span>　　　　年　　　月　　　日</div>
-          <div class="consent-field"><span class="consent-label">患者氏名</span></div>
-          <div class="consent-field"><span class="consent-label">説明日</span>　　　　年　　　月　　　日</div>
-          <div class="consent-field"><span class="consent-label">説明医</span></div>
-          <div class="consent-field"><span class="consent-label">同席者・ご家族</span></div>
-        </div>
-        <div class="consent-summary">
-          <h2>説明・確認項目</h2>
-          <ul>
-            <li>病気の状態と、手術が必要となる理由</li>
-            <li>手術の目的、方法、麻酔、術式が変更となる可能性</li>
-            <li>期待される効果と、聴力が改善しないまたは悪化する可能性</li>
-            <li>出血、感染、めまい、難聴、耳鳴り、味覚障害、顔面神経麻痺、髄液漏、髄膜炎、再発などの合併症</li>
-            <li>経過観察や処置など、手術以外の選択肢と限界</li>
-            <li>術後の注意点、受診が必要な症状、長期通院の必要性</li>
-          </ul>
-        </div>
-        <div class="signature-grid">
-          <div class="signature-box">
-            <strong>患者さん・代諾者署名</strong>
-            <div class="signature-line"></div>
-            <div>続柄：</div>
-          </div>
-          <div class="signature-box">
-            <strong>医療者記入欄</strong>
-            <div class="signature-line"></div>
-            <div>説明医署名：</div>
-          </div>
-        </div>
-        <p class="print-note">この欄は印刷時の確認用です。電子表示・スライド表示では説明を見やすくするため、本文中心の構成にしています。版数: {html.escape(version)} / 更新日: {html.escape(updated)} / 医師レビュー: {html.escape(reviewed_by)} {html.escape(review_date)}</p>
-      </section>"""
+
+# 同意欄生成関数は廃止されました
 
 
 # セクションのHTMLブロックを生成
-def generate_sections_html(title, description, sections):
+def generate_sections_html(title, description, sections, inline=False, metadata=None):
     html_blocks = []
 
     for sec in sections:
@@ -1233,7 +1198,9 @@ def generate_sections_html(title, description, sections):
             lead_html = (
                 f'        <p class="lead">{description}</p>' if description else ""
             )
-            visual_html = section_visual_html(sec.get("visual_key", "cover"))
+            visual_html = get_section_visual_element(
+                sec.get("visual_key", "cover"), inline=inline, title=title, metadata=metadata
+            )
             block = f"""      <section class="doc-cover section-block{summary_class}">
         <div class="section-layout">
           <div class="section-text">
@@ -1250,7 +1217,9 @@ def generate_sections_html(title, description, sections):
       </section>"""
         else:
             # 通常セクションのマークアップ
-            visual_html = section_visual_html(sec.get("visual_key", ""))
+            visual_html = get_section_visual_element(
+                sec.get("visual_key", ""), inline=inline, title=title, metadata=metadata
+            )
             block = f"""      <section class="section-block{summary_class}">
         <div class="section-layout">
           <div class="section-text">
@@ -1268,7 +1237,7 @@ def generate_sections_html(title, description, sections):
 
 
 # メイン処理：明示されたMarkdownファイルのみ変換
-def convert_all_markdowns(target_names):
+def convert_all_markdowns(target_names, inline=False):
     if not target_names:
         print("ERROR: 変換するMarkdownファイルを1つ以上指定してください。")
         return 1
@@ -1328,13 +1297,11 @@ def convert_all_markdowns(target_names):
                 md_text = f.read()
 
             title, description, sections, metadata = parse_markdown_to_sections(md_text)
-            content_html = generate_sections_html(title, description, sections)
+            content_html = generate_sections_html(
+                title, description, sections, inline=inline, metadata=metadata
+            )
 
-            # print_consent が "false" の場合は、署名欄を出力せず空にする
-            if metadata.get("print_consent", "true").lower() == "false":
-                print_consent_html = ""
-            else:
-                print_consent_html = generate_print_consent_html(title, metadata)
+            # 同意確認欄の出力は廃止されました
 
             # メタデータコメント文字列の生成
             meta_comments_lines = [
@@ -1354,7 +1321,6 @@ def convert_all_markdowns(target_names):
             final_html = html_template.format(
                 title=title,
                 content=content_html,
-                print_consent=print_consent_html,
                 meta_comments=meta_comments_str,
             )
 
@@ -1390,5 +1356,10 @@ if __name__ == "__main__":
         nargs="+",
         help="変換するMarkdownファイル名。必ず1つ以上指定してください。",
     )
+    parser.add_argument(
+        "--inline",
+        action="store_true",
+        help="画像をBase64でHTMLに直接埋め込みます（インライン化）。",
+    )
     args = parser.parse_args()
-    raise SystemExit(convert_all_markdowns(args.targets))
+    raise SystemExit(convert_all_markdowns(args.targets, inline=args.inline))

@@ -29,3 +29,5 @@ pptx/
 PDF/
 *.inspect.ndjson
 
+# Images & Draft assets
+images/draft/
