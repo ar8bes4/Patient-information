@@ -20,6 +20,8 @@ Patient-information/
 ├── src_202605原本/      # 2026年5月時点の参照用原本。改変しない
 ├── HTML/                # generate_html.py で生成された HTML 成果物
 ├── generate_html.py     # Markdown から HTML へ変換するビルドスクリプト
+├── convert_to_office.py # Markdown から Word (.docx) & PDF を生成するスクリプト
+├── convert_to_pptx.py   # Markdown から説明用スライド (.pptx) を生成するスクリプト
 ├── README.md            # この説明書
 ├── CHANGELOG.md         # 変更履歴
 └── .gitignore           # 開発用の除外設定
@@ -94,8 +96,9 @@ updated: "YYYY-MM-DD"
 ---
 ```
 
-## HTML 生成手順
+## 各種ファイル生成手順
 
+### 1. HTML 生成（画面表示・スライド・印刷等）
 ローカルで HTML を再生成する場合は、リポジトリ直下で対象 Markdown を必ず指定して実行します。
 
 ```bash
@@ -108,15 +111,25 @@ python generate_html.py 対象ファイル名.md
 python generate_html.py 好酸球性副鼻腔炎_ESS説明書.md
 ```
 
-実行後、指定した `src/*.md` に対応する HTML が `HTML/` に出力されます。対象ファイルを省略した一括生成は行いません。
+実行後、指定した `src/*.md` に対応する HTML が `HTML/` に出力されます。対象ファイルを省略した一括生成は行いません。生成 HTML には、通常の画面表示、高齢者向け印刷、紙節約印刷、スライド表示、印刷/PDF 出力の各モードが内包されています。
 
-生成 HTML には、以下の表示モードが含まれます。
+### 2. Office ドキュメント（Word/PDF）生成
+Markdown 正本から Word 形式（`.docx`）および閲覧用 PDF（`.pdf`）を生成するには、以下を実行します。
 
-- 通常の画面表示
-- 高齢者向け印刷
-- 紙節約印刷
-- スライド表示
-- 印刷/PDF 出力
+```bash
+python convert_to_office.py src/対象ファイル名.md
+```
+
+実行後、`docx/` および `PDF/` 配下に対応するファイルが出力されます。
+
+### 3. 説明用スライド（PowerPoint）生成
+Markdown 正本から説明用スライド（`.pptx`）を生成するには、以下を実行します。スライド要約や図版位置がスライドに反映され、スピーカーノートに Markdown の詳細テキストが自動流し込みされます。
+
+```bash
+python convert_to_pptx.py src/対象ファイル名.md
+```
+
+実行後、`pptx/` 配下に対応する `*_説明スライド.pptx` ファイルが出力されます。
 
 ## 改訂時の基本フロー
 
