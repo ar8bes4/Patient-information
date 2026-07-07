@@ -1147,6 +1147,14 @@ def get_section_visual_element(visual_key, inline=False, title="", metadata=None
         },
         "general": {
             "cover": ("general-cover.png", "治療説明図"),
+            "larynx-anatomy": ("larynx-anatomy.png", "喉頭の解剖とがんの広がり（模式図）"),
+            "staging-puncture": ("staging-puncture.png", "エコーガイド下穿刺吸引細胞診のイメージ"),
+            "treatment-split": ("treatment-split.png", "リンパ節転移の有無による照射範囲 of 分岐"),
+            "treatment-options": ("treatment-options.png", "治療方針の選択肢（放射線単独療法の推奨）"),
+            "rt-schedule": ("rt-schedule.png", "放射線治療のスケジュール"),
+            "side-effects": ("side-effects.png", "放射線治療に伴う副作用と対策"),
+            "stenosis-mitigation": ("stenosis-mitigation.png", "将来の狭窄リスクに対する緩和・対策（気管切開、胃瘻など）"),
+            "consent-flow": ("consent-flow.png", "同意から治療開始までの流れ"),
         },
     }
 
