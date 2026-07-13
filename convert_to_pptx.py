@@ -3,6 +3,7 @@
 import os
 import sys
 import re
+import subprocess
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
@@ -10,36 +11,31 @@ from pptx.enum.text import PP_ALIGN
 
 base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
 pptx_dir = os.path.join(base_dir, "pptx")
+OFFICECLI_PATH = r"C:\Users\yert1\Documents\agy\00_System\bin\officecli.exe"
 
 if not os.path.exists(pptx_dir):
     os.makedirs(pptx_dir)
 
-def find_image_file(filename):
-    """指定された画像ファイルを images 配下から再帰的に探索する"""
-    search_dirs = [
-        os.path.join(base_dir, "images", "optimized"),
-        os.path.join(base_dir, "images", "master"),
-        os.path.join(base_dir, "images", "draft")
-    ]
-    for s_dir in search_dirs:
-        if not os.path.exists(s_dir):
-            continue
-        for root, dirs, files in os.walk(s_dir):
-            if filename in files:
-                return os.path.join(root, filename)
-    return None
 
-def get_image_for_visual(visual_key):
-    """visual_keyから対応する画像ファイルをマッピングする"""
-    # 簡易マッピング
-    mapping = {
-        "nasopharynx-referral": "nasopharynx-referral.png",
-        "nasopharynx-anatomy": "nasopharynx-anatomy.png",
-        "cover": "general-cover.png"
-    }
-    
-    filename = mapping.get(visual_key, f"{visual_key}.png")
-    return find_image_file(filename)
+def run_officecli_checks(document_path):
+    """生成したPowerPointの構造検証と問題検出を行う。検証失敗では生成を中断しない。"""
+    if not os.path.isfile(OFFICECLI_PATH):
+        print(f"WARNING: OfficeCLIが見つからないため検証を省略します: {OFFICECLI_PATH}")
+        return
+
+    checks = [
+        ("OpenXMLスキーマ検証", [OFFICECLI_PATH, "validate", document_path, "--json"]),
+        ("スライド問題の検出", [OFFICECLI_PATH, "view", document_path, "issues", "--json"]),
+    ]
+    for label, command in checks:
+        result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+        if result.returncode == 0:
+            print(f"OfficeCLI {label}: 完了")
+            if result.stdout.strip():
+                print(result.stdout.strip())
+        else:
+            detail = result.stderr.strip() or result.stdout.strip() or "詳細情報なし"
+            print(f"WARNING: OfficeCLI {label}に失敗しました: {detail}")
 
 def parse_markdown_to_sections(md_text):
     lines = md_text.splitlines()
@@ -68,7 +64,6 @@ def parse_markdown_to_sections(md_text):
     sections = []
     current_section = {
         "title": "表紙",
-        "visual_key": "cover",
         "slide_summary": "",
         "body_lines": []
     }
@@ -91,16 +86,13 @@ def parse_markdown_to_sections(md_text):
             is_first = False
             current_section = {
                 "title": h2_text,
-                "visual_key": "",
                 "slide_summary": "",
                 "body_lines": []
             }
             continue
             
-        # ビジュアルタグ
-        visual_match = re.match(r"^\{\{visual:\s*([a-zA-Z0-9_-]+)\s*\}\}$", cleaned)
-        if visual_match:
-            current_section["visual_key"] = visual_match.group(1)
+        if re.match(r"^\{\{visual:\s*[a-zA-Z0-9_-]+\s*\}\}$", cleaned):
+            # 旧原稿との互換性のため図版指定は読み飛ばす。
             continue
             
         # スライド要約タグ
@@ -125,7 +117,6 @@ def create_slide_deck(title, sections, output_path):
     teal_dark = RGBColor(0x0F, 0x76, 0x6E) # 主見出し
     teal_light = RGBColor(0xE6, 0xFF, 0xFA) # 背景グラデ用ベース
     ink_dark = RGBColor(0x1F, 0x29, 0x33) # 文字色
-    muted_gray = RGBColor(0x64, 0x74, 0x8B) # サブテキスト
     
     # 1. 表紙スライドの作成 (白地またはライトブルー背景にレイアウト)
     slide_layout = prs.slide_layouts[6] # 空白レイアウト
@@ -175,14 +166,8 @@ def create_slide_deck(title, sections, output_path):
         p.font.bold = True
         p.font.color.rgb = teal_dark
         
-        # 左右分割レイアウト
-        # 左側: テキスト (スライド要約を大きく表示)
-        # 右側: ビジュアル（画像またはプレースホルダー）
-        has_visual = bool(sec["visual_key"])
-        visual_img_path = get_image_for_visual(sec["visual_key"]) if has_visual else None
-        
-        left_width = Inches(7.5) if (has_visual and visual_img_path) else Inches(11.7)
-        tx_content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.8), left_width, Inches(4.8))
+        # 本文・スライド要約を全幅で表示する。
+        tx_content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.8), Inches(11.7), Inches(4.8))
         tf_content = tx_content_box.text_frame
         tf_content.word_wrap = True
         
@@ -213,40 +198,11 @@ def create_slide_deck(title, sections, output_path):
                 p_body.font.color.rgb = ink_dark
                 p_body.space_after = Pt(10)
                 
-        # 右側: ビジュアル画像の挿入
-        if has_visual and visual_img_path:
-            try:
-                slide.shapes.add_picture(
-                    visual_img_path,
-                    Inches(8.8),
-                    Inches(1.8),
-                    width=Inches(3.8)
-                )
-            except Exception as e:
-                # 画像の貼り付けに失敗した場合は枠線とテキストでフォールバック
-                tx_fallback = slide.shapes.add_textbox(Inches(8.8), Inches(1.8), Inches(3.8), Inches(4.0))
-                tf_fallback = tx_fallback.text_frame
-                p_fb = tf_fallback.paragraphs[0]
-                p_fb.text = f"【図版位置】\n{sec['visual_key']}"
-                p_fb.font.name = "Yu Gothic"
-                p_fb.font.size = Pt(14)
-                p_fb.font.color.rgb = muted_gray
-        elif has_visual:
-            # 指定はあるが画像ファイルが見つからない場合のプレースホルダー
-            tx_placeholder = slide.shapes.add_textbox(Inches(8.8), Inches(1.8), Inches(3.8), Inches(4.0))
-            tf_ph = tx_placeholder.text_frame
-            p_ph = tf_ph.paragraphs[0]
-            p_ph.text = f"【説明用イラスト位置】\n({sec['visual_key']})"
-            p_ph.font.name = "Yu Gothic"
-            p_ph.font.size = Pt(14)
-            p_ph.font.color.rgb = muted_gray
-            p_ph.alignment = PP_ALIGN.CENTER
-            
         # スピーカーノートに元の詳細テキストを流し込む
         notes_slide = slide.notes_slide
         clean_body = []
         for line in sec["body_lines"]:
-            # スライド要約やビジュアル等のメタ記述は除外
+            # スライド要約などのメタ記述は除外
             if line.strip().startswith("{{") and line.strip().endswith("}}"):
                 continue
             # 太字のマークなどを綺麗にする
@@ -257,6 +213,7 @@ def create_slide_deck(title, sections, output_path):
         
     prs.save(output_path)
     print(f"Successfully generated PPTX at {output_path}")
+    run_officecli_checks(output_path)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

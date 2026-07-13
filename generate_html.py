@@ -4,8 +4,6 @@ import os
 import re
 import argparse
 import html
-import base64
-import mimetypes
 
 # パス設定
 base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
@@ -630,9 +628,6 @@ def parse_markdown_to_sections(md_text):
                     metadata[key] = m_meta.group(1).strip().strip('"').strip("'")
                     break
 
-    # 画像リストの抽出
-    image_paths = re.findall(r"!\[.*?\]\((.*?)\)", md_text)
-    metadata["images"] = ", ".join(image_paths)
     metadata["build_datetime"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     body_lines = lines[start_idx:]
@@ -653,7 +648,6 @@ def parse_markdown_to_sections(md_text):
     sections = []
     current_section_content = []
     current_section_title = ""
-    current_section_visual_key = ""
     current_section_slide_summary = ""
     is_cover = True  # 最初のH2に到達するまではカバーセクション
 
@@ -702,7 +696,6 @@ def parse_markdown_to_sections(md_text):
                     {
                         "is_cover": True,
                         "title": title,
-                        "visual_key": "cover",
                         "slide_summary": current_section_slide_summary,
                         "content": "\n".join(current_section_content),
                     }
@@ -714,7 +707,6 @@ def parse_markdown_to_sections(md_text):
                     {
                         "is_cover": False,
                         "title": current_section_title,
-                        "visual_key": current_section_visual_key,
                         "slide_summary": current_section_slide_summary,
                         "content": "\n".join(current_section_content),
                     }
@@ -723,16 +715,16 @@ def parse_markdown_to_sections(md_text):
             # 新しいセクションをスタート
             current_section_content = []
             current_section_title = h2_text
-            current_section_visual_key = ""
             current_section_slide_summary = ""
             current_section_content.append(f"      <h2>{h2_text}</h2>")
             continue
 
-        visual_match = re.match(
-            r"^(?:>\s*)?\{\{visual:\s*([a-zA-Z0-9_-]+)\s*\}\}$", cleaned_line
-        )
-        if visual_match:
-            current_section_visual_key = visual_match.group(1)
+        if re.match(r"^(?:>\s*)?\{\{visual:\s*[a-zA-Z0-9_-]+\s*\}\}$", cleaned_line):
+            # 旧原稿との互換性のため図版指定は読み飛ばす。
+            continue
+
+        if re.match(r"^!\[.*?\]\(.*?\)$", cleaned_line):
+            # Markdownの画像指定も出力せず、本文だけをHTML化する。
             continue
 
         slide_summary_match = re.match(
@@ -865,7 +857,6 @@ def parse_markdown_to_sections(md_text):
             {
                 "is_cover": True,
                 "title": title,
-                "visual_key": "cover",
                 "slide_summary": current_section_slide_summary,
                 "content": "\n".join(current_section_content),
             }
@@ -875,7 +866,6 @@ def parse_markdown_to_sections(md_text):
             {
                 "is_cover": False,
                 "title": current_section_title,
-                "visual_key": current_section_visual_key,
                 "slide_summary": current_section_slide_summary,
                 "content": "\n".join(current_section_content),
             }
@@ -1190,7 +1180,7 @@ def get_section_visual_element(visual_key, inline=False, title="", metadata=None
 
 
 # セクションのHTMLブロックを生成
-def generate_sections_html(title, description, sections, inline=False, metadata=None):
+def generate_sections_html(title, description, sections):
     html_blocks = []
 
     for sec in sections:
@@ -1206,37 +1196,21 @@ def generate_sections_html(title, description, sections, inline=False, metadata=
             lead_html = (
                 f'        <p class="lead">{description}</p>' if description else ""
             )
-            visual_html = get_section_visual_element(
-                sec.get("visual_key", "cover"), inline=inline, title=title, metadata=metadata
-            )
             block = f"""      <section class="doc-cover section-block{summary_class}">
-        <div class="section-layout">
-          <div class="section-text">
+        <div class="section-text">
             <p class="eyebrow">患者さん・ご家族への説明資料</p>
             <h1>{title}</h1>
 {lead_html}
 {sec["content"]}
 {slide_summary_html}
-          </div>
-          <div class="section-visual" aria-hidden="true">
-{visual_html}
-          </div>
         </div>
       </section>"""
         else:
             # 通常セクションのマークアップ
-            visual_html = get_section_visual_element(
-                sec.get("visual_key", ""), inline=inline, title=title, metadata=metadata
-            )
             block = f"""      <section class="section-block{summary_class}">
-        <div class="section-layout">
-          <div class="section-text">
+        <div class="section-text">
 {sec["content"]}
 {slide_summary_html}
-          </div>
-          <div class="section-visual" aria-hidden="true">
-{visual_html}
-          </div>
         </div>
       </section>"""
         html_blocks.append(block)
@@ -1245,7 +1219,7 @@ def generate_sections_html(title, description, sections, inline=False, metadata=
 
 
 # メイン処理：明示されたMarkdownファイルのみ変換
-def convert_all_markdowns(target_names, inline=False):
+def convert_all_markdowns(target_names):
     if not target_names:
         print("ERROR: 変換するMarkdownファイルを1つ以上指定してください。")
         return 1
@@ -1305,9 +1279,7 @@ def convert_all_markdowns(target_names, inline=False):
                 md_text = f.read()
 
             title, description, sections, metadata = parse_markdown_to_sections(md_text)
-            content_html = generate_sections_html(
-                title, description, sections, inline=inline, metadata=metadata
-            )
+            content_html = generate_sections_html(title, description, sections)
 
             # 同意確認欄の出力は廃止されました
 
@@ -1320,7 +1292,6 @@ def convert_all_markdowns(target_names, inline=False):
                 f"  Meta:change_reason: {metadata.get('change_reason', '')}",
                 f"  Meta:version: {metadata.get('version', '')}",
                 f"  Meta:build_datetime: {metadata.get('build_datetime', '')}",
-                f"  Meta:images: {metadata.get('images', '')}",
                 "-->",
             ]
             meta_comments_str = "\n".join(meta_comments_lines)
@@ -1364,10 +1335,5 @@ if __name__ == "__main__":
         nargs="+",
         help="変換するMarkdownファイル名。必ず1つ以上指定してください。",
     )
-    parser.add_argument(
-        "--inline",
-        action="store_true",
-        help="画像をBase64でHTMLに直接埋め込みます（インライン化）。",
-    )
     args = parser.parse_args()
-    raise SystemExit(convert_all_markdowns(args.targets, inline=args.inline))
+    raise SystemExit(convert_all_markdowns(args.targets))

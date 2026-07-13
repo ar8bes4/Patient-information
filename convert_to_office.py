@@ -2,10 +2,34 @@
 import os
 import sys
 import re
+import subprocess
 import docx
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import win32com.client
+
+OFFICECLI_PATH = r"C:\Users\yert1\Documents\agy\00_System\bin\officecli.exe"
+
+
+def run_officecli_checks(document_path):
+    """生成したOffice文書の構造検証と問題検出を行う。検証失敗では生成を中断しない。"""
+    if not os.path.isfile(OFFICECLI_PATH):
+        print(f"WARNING: OfficeCLIが見つからないため検証を省略します: {OFFICECLI_PATH}")
+        return
+
+    checks = [
+        ("OpenXMLスキーマ検証", [OFFICECLI_PATH, "validate", document_path, "--json"]),
+        ("文書問題の検出", [OFFICECLI_PATH, "view", document_path, "issues", "--json"]),
+    ]
+    for label, command in checks:
+        result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+        if result.returncode == 0:
+            print(f"OfficeCLI {label}: 完了")
+            if result.stdout.strip():
+                print(result.stdout.strip())
+        else:
+            detail = result.stderr.strip() or result.stdout.strip() or "詳細情報なし"
+            print(f"WARNING: OfficeCLI {label}に失敗しました: {detail}")
 
 def parse_markdown(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -240,4 +264,5 @@ if __name__ == "__main__":
     
     parsed = parse_markdown(md_file)
     build_docx(parsed, docx_path)
+    run_officecli_checks(docx_path)
     convert_docx_to_pdf(docx_path, pdf_path)
