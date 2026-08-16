@@ -1,1339 +1,152 @@
 # -*- coding: utf-8 -*-
-# 患者説明文書のMarkdownをプレビュー・印刷対応のHTMLテンプレートに自動変換するスクリプト
-import os
-import re
+"""患者説明文書のMarkdownから、試作・閲覧用HTMLを生成する。"""
 import argparse
 import html
+import os
+import re
+from datetime import datetime
 
-# パス設定
-base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
-html_dir = os.path.join(base_dir, "HTML")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, "HTML")
+IMAGE_PATTERN = re.compile(r'^!\[([^\]]*)\]\(([^)]+)\)$')
+FRONT_MATTER_PATTERN = re.compile(r'^---\s*\n(.*?)\n---\s*\n', re.DOTALL)
 
-# HTML出力ディレクトリが存在しない場合は作成
-if not os.path.exists(html_dir):
-    os.makedirs(html_dir)
 
-# HTMLのベーステンプレート
-# サンプル.htmlの優れたデザインと表示モード（画面・高齢者印刷・紙節約印刷・スライド）の切り替えJSを内包
-html_template = """<!doctype html>
+def front_matter_and_body(text):
+    match = FRONT_MATTER_PATTERN.match(text)
+    if not match:
+        return {}, text
+    metadata = {}
+    for line in match.group(1).splitlines():
+        if ":" in line:
+            key, value = line.split(":", 1)
+            metadata[key.strip()] = value.strip().strip('"').strip("'")
+    return metadata, text[match.end():]
+
+
+def inline(text):
+    escaped = html.escape(text.strip())
+    escaped = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped)
+    return escaped
+
+
+def parse_blocks(body, source_dir):
+    blocks, lines, index = [], body.splitlines(), 0
+    while index < len(lines):
+        raw = lines[index]
+        text = raw.strip()
+        index += 1
+        if not text or (text.startswith("{{") and text.endswith("}}")):
+            continue
+        image_match = IMAGE_PATTERN.match(text)
+        if image_match:
+            alt, relative_path = image_match.groups()
+            path = os.path.normpath(os.path.join(source_dir, relative_path))
+            blocks.append(("image", (alt, path)))
+            continue
+        if text.startswith("# "):
+            blocks.append(("h1", text[2:]))
+        elif text.startswith("## "):
+            blocks.append(("h2", text[3:]))
+        elif text.startswith("### "):
+            blocks.append(("h3", text[4:]))
+        elif text.startswith("> [!"):
+            marker = text[3:].split("]", 1)[0].upper()
+            message = []
+            while index < len(lines) and lines[index].strip().startswith(">"):
+                message.append(lines[index].strip()[1:].strip())
+                index += 1
+            blocks.append(("callout", (marker, " ".join(message))))
+        elif text.startswith("> "):
+            quote = text[2:]
+            if quote.startswith("{{") and quote.endswith("}}"):
+                continue
+            blocks.append(("quote", quote))
+        elif text.startswith(("- ", "* ")):
+            items = [text[2:]]
+            while index < len(lines) and lines[index].strip().startswith(("- ", "* ")):
+                items.append(lines[index].strip()[2:])
+                index += 1
+            blocks.append(("list", items))
+        else:
+            blocks.append(("p", raw.strip()))
+    return blocks
+
+
+def render_blocks(blocks):
+    rendered = []
+    for kind, content in blocks:
+        if kind in {"h1", "h2", "h3", "p", "quote"}:
+            tag = {"h1": "h1", "h2": "h2", "h3": "h3", "p": "p", "quote": "blockquote"}[kind]
+            rendered.append(f"<{tag}>{inline(content)}</{tag}>")
+        elif kind == "list":
+            rendered.append("<ul>" + "".join(f"<li>{inline(item)}</li>" for item in content) + "</ul>")
+        elif kind == "callout":
+            marker, message = content
+            level = "important" if marker in {"IMPORTANT", "WARNING", "CAUTION"} else "note"
+            rendered.append(f'<aside class="callout {level}"><p class="callout-label">{html.escape(marker)}</p><p>{inline(message)}</p></aside>')
+        elif kind == "image":
+            alt, image_path = content
+            if os.path.isfile(image_path):
+                relative_path = os.path.relpath(image_path, OUTPUT_DIR).replace("\\", "/")
+                rendered.append(f'<figure><img src="{html.escape(relative_path)}" alt="{html.escape(alt)}"><figcaption>{inline(alt)}</figcaption></figure>')
+            else:
+                rendered.append(f'<aside class="callout note"><p class="callout-label">図版未検出</p><p>{inline(alt)}</p></aside>')
+    return "\n".join(rendered)
+
+
+def build_html(title, status, body_html, source_name):
+    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+    safe_title = html.escape(title)
+    return f'''<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  {meta_comments}
-  <title>{title}</title>
-  <style id="screen-css">
-    :root {{
-      --ink: #1f2933;
-      --muted: #52606d;
-      --line: #d9e2ec;
-      --panel: #f8fafc;
-      --accent: #0f766e;
-      --accent-strong: #115e59;
-      --warning: #9f580a;
-      --warning-bg: #fff7e6;
-      --urgent: #b42318;
-      --urgent-bg: #fff1f0;
-      --paper: #ffffff;
-      --font: "Yu Gothic", "YuGothic", "Meiryo", "Segoe UI", "Arial", sans-serif;
-    }}
-    * {{ box-sizing: border-box; }}
-    html {{ scroll-behavior: smooth; }}
-    body {{
-      margin: 0;
-      color: var(--ink);
-      background: #eef3f7;
-      font-family: var(--font);
-      font-size: 17px;
-      line-height: 1.75;
-    }}
-    .app-toolbar {{
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px 18px;
-      background: rgba(255, 255, 255, 0.96);
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(8px);
-    }}
-    .toolbar-title {{ font-weight: 700; color: var(--accent-strong); white-space: nowrap; }}
-    .toolbar-actions {{ display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }}
-    button {{
-      min-height: 38px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 6px 12px;
-      background: #ffffff;
-      color: var(--ink);
-      font: inherit;
-      font-size: 14px;
-      cursor: pointer;
-    }}
-    button[aria-pressed="true"] {{
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #ffffff;
-    }}
-    .slide-pagination {{ display: none; }}
-    .document {{ width: min(100%, 980px); margin: 0 auto; padding: 28px 18px 56px; }}
-    article {{
-      background: var(--paper);
-      border: 1px solid var(--line);
-      box-shadow: 0 14px 35px rgba(31, 41, 51, 0.08);
-    }}
-    .section-block {{ padding: 28px 34px; border-bottom: 1px solid var(--line); }}
-    .section-block:last-child {{ border-bottom: 0; }}
-    .doc-cover {{
-      padding-top: 42px;
-      background: linear-gradient(180deg, #ffffff 0%, #f7fbfa 100%);
-    }}
-    .eyebrow {{ margin: 0 0 8px; color: var(--accent-strong); font-size: 15px; font-weight: 700; }}
-    h1, h2, h3 {{ margin: 0; line-height: 1.35; }}
-    h1 {{ max-width: 820px; font-size: 34px; }}
-    h2 {{ margin-bottom: 14px; padding-left: 12px; border-left: 5px solid var(--accent); font-size: 24px; }}
-    h3 {{ margin-bottom: 8px; color: var(--accent-strong); font-size: 18px; }}
-    p, ul, ol, dl {{ margin-top: 0; margin-bottom: 16px; }}
-    ul, ol {{ padding-left: 1.35em; }}
-    li {{ margin: 7px 0; }}
-    a {{ color: var(--accent-strong); }}
-    .lead {{ max-width: 780px; margin-top: 18px; font-size: 19px; }}
-    .note {{
-      padding: 14px 16px;
-      border-left: 5px solid var(--warning);
-      background: var(--warning-bg);
-      margin-bottom: 16px;
-    }}
-    .step-list, .risk-grid {{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 16px;
-    }}
-    .step-list section, .risk-grid section {{
-      padding: 16px;
-      border: 1px solid var(--line);
-      background: var(--panel);
-    }}
-    .check-list {{ list-style: none; padding-left: 0; }}
-    .check-list li {{ position: relative; padding-left: 30px; }}
-    .check-list li::before {{
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0.58em;
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--accent);
-      border-radius: 3px;
-      background: #ffffff;
-    }}
-    .urgent {{ border-left: 7px solid var(--urgent); background: var(--urgent-bg); }}
-    .urgent h2 {{ border-left-color: var(--urgent); }}
-    .section-layout {{
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 220px;
-      gap: 24px;
-      align-items: start;
-    }}
-    .section-text {{ min-width: 0; }}
-    .section-visual {{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 180px;
-      border: 1px solid #cfe5e2;
-      background: #f7fbfa;
-      padding: 16px;
-    }}
-    .section-visual svg {{
-      width: 100%;
-      max-width: 180px;
-      height: auto;
-    }}
-    .section-visual figure {{
-      width: 100%;
-      margin: 0;
-    }}
-    .section-visual img {{
-      display: block;
-      width: 100%;
-      max-width: 320px;
-      height: auto;
-      margin: 0 auto;
-    }}
-    .section-visual figcaption {{
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-      text-align: center;
-    }}
-    .slide-summary {{ display: none; }}
-    
-    @media (max-width: 760px) {{
-      body {{ font-size: 16px; }}
-      .app-toolbar {{ position: static; align-items: flex-start; flex-direction: column; }}
-      .toolbar-actions {{ justify-content: flex-start; }}
-      .document {{ padding: 0; }}
-      article {{ border: 0; box-shadow: none; }}
-      .section-block {{ padding: 24px 18px; }}
-      h1 {{ font-size: 28px; }}
-      h2 {{ font-size: 21px; }}
-      .step-list, .risk-grid {{ grid-template-columns: 1fr; }}
-      .section-layout {{ grid-template-columns: 1fr; }}
-      .section-visual {{ min-height: 140px; }}
-    }}
-    @media print {{ .app-toolbar, .slide-pagination {{ display: none; }} }}
-  </style>
-  <style id="print-large-css" media="print">
-    @page {{ size: A4; margin: 14mm 14mm 16mm; }}
-    * {{ box-shadow: none !important; text-shadow: none !important; }}
-    html, body {{
-      margin: 0; padding: 0;
-      background: #ffffff !important; color: #111111;
-      font-family: var(--font);
-      font-size: 16pt; line-height: 1.55;
-    }}
-    .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
-    
-    /* 改ページ制御の最適化: セクション全体のbreak-insideを解除し、子要素と見出し泣き別れを制御 */
-    .section-block {{ break-inside: auto; page-break-inside: auto; padding: 0 0 7mm; border: 0; }}
-    p, li, .note, .urgent {{ break-inside: avoid; page-break-inside: avoid; }}
-    
-    .doc-cover {{ padding-top: 0; background: #ffffff; }}
-    .eyebrow {{ margin: 0 0 3mm; font-size: 12pt; font-weight: 700; }}
-    h1, h2, h3 {{ break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.28; }}
-    h1 {{ margin: 0 0 6mm; font-size: 27pt; }}
-    h2 {{ margin: 0 0 4mm; padding: 0 0 1.5mm; border: 0; border-bottom: 1.5pt solid #111111; font-size: 20pt; }}
-    h3 {{ margin: 0 0 2mm; font-size: 16pt; }}
-    p, ul, ol, dl {{ margin-top: 0; margin-bottom: 4mm; }}
-    ul, ol {{ padding-left: 1.35em; }}
-    li {{ margin: 1.5mm 0; }}
-    a {{ color: #111111; text-decoration: none; }}
-    .lead {{ font-size: 17pt; }}
-    .section-layout {{ display: grid; grid-template-columns: minmax(0, 1fr) 38mm; gap: 7mm; }}
-    .section-visual {{ min-height: 32mm; padding: 2mm; border: 0.8pt solid #999999; background: #ffffff !important; }}
-    .section-visual svg {{ max-width: 34mm; }}
-    .section-visual img {{ max-width: 42mm; }}
-    .section-visual figcaption {{ font-size: 8.5pt; }}
-    .note, .urgent {{
-      padding: 3mm;
-      border: 1.2pt solid #333333; background: #ffffff !important;
-    }}
-    .step-list, .risk-grid {{ display: block; }}
-    .step-list section, .risk-grid section {{
-      break-inside: avoid; page-break-inside: avoid; margin: 0 0 3mm; padding: 3mm;
-      border: 1pt solid #444444; background: #ffffff !important;
-    }}
-    .check-list {{ list-style: square; padding-left: 1.35em; }}
-    .check-list li {{ padding-left: 0; }}
-    .check-list li::before {{ display: none; }}
-  </style>
-  <style id="print-compact-css" media="not all">
-    @page {{ size: A4; margin: 10mm 10mm 11mm; }}
-    * {{ box-shadow: none !important; text-shadow: none !important; }}
-    html, body {{
-      margin: 0; padding: 0;
-      background: #ffffff !important; color: #111111;
-      font-family: var(--font);
-      font-size: 10.8pt; line-height: 1.28;
-    }}
-    .document, article {{ width: auto; margin: 0; padding: 0; border: 0; background: #ffffff; }}
-    
-    /* 改ページ制御の最適化: セクション全体のbreak-insideを解除し、子要素と見出し泣き別れを制御 */
-    .section-block {{ break-inside: auto; page-break-inside: auto; padding: 0 0 4mm; border: 0; }}
-    p, li, .note, .urgent {{ break-inside: avoid; page-break-inside: avoid; }}
-    
-    /* 紙節約用の2段組み設定 */
-    .section-text {{ column-count: 2; column-gap: 6mm; }}
-    h2, h3 {{ column-span: all; }}
-    
-    .doc-cover {{ padding-top: 0; background: #ffffff; }}
-    .doc-cover .section-text {{ column-count: 1; }} /* 表紙セクションは2段組みにしない */
-    .eyebrow {{ margin: 0 0 1mm; font-size: 9.5pt; font-weight: 700; }}
-    h1, h2, h3 {{ break-after: avoid; page-break-after: avoid; color: #111111; line-height: 1.18; }}
-    h1 {{ margin: 0 0 3mm; font-size: 18pt; }}
-    h2 {{ margin: 0 0 2mm; padding: 0 0 1mm; border: 0; border-bottom: 1pt solid #111111; font-size: 13.5pt; }}
-    h3 {{ margin: 0 0 1mm; font-size: 11.5pt; }}
-    p, ul, ol, dl {{ margin-top: 0; margin-bottom: 2.5mm; }}
-    ul, ol {{ padding-left: 1.2em; }}
-    li {{ margin: 0.8mm 0; }}
-    a {{ color: #111111; text-decoration: none; }}
-    .lead {{ font-size: 11.5pt; }}
-    
-    .section-layout {{ display: grid; grid-template-columns: minmax(0, 1fr) 35mm; gap: 4mm; }}
-    .section-visual {{ min-height: 25mm; padding: 1.5mm; border: 0.8pt solid #aaaaaa; background: #ffffff !important; }}
-    .section-visual svg {{ max-width: 30mm; }}
-    .section-visual img {{ max-width: 32mm; }}
-    .section-visual figcaption {{ font-size: 7.5pt; }}
-    
-    .note, .urgent {{
-      padding: 2mm;
-      border: 0.8pt solid #333333; background: #ffffff !important;
-    }}
-    .step-list, .risk-grid {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; }}
-    .step-list section, .risk-grid section {{
-      break-inside: avoid; page-break-inside: avoid; padding: 2mm;
-      border: 0.8pt solid #444444; background: #ffffff !important;
-    }}
-    .check-list {{ list-style: square; padding-left: 1.2em; }}
-    .check-list li {{ padding-left: 0; }}
-    .check-list li::before {{ display: none; }}
-  </style>
-
-  <style id="slides-css" media="not all">
-    body[data-mode="slides"] {{ overflow: hidden; background: #0b1329; }}
-    body[data-mode="slides"] .app-toolbar {{
-      background: rgba(11, 19, 41, 0.95); border-bottom-color: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(12px);
-    }}
-    body[data-mode="slides"] .toolbar-title {{ color: #81e6d9; font-weight: 600; }}
-    body[data-mode="slides"] button {{
-      border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); color: #e2e8f0;
-      border-radius: 8px; transition: all 0.25s ease;
-    }}
-    body[data-mode="slides"] button:hover {{
-      background: rgba(255, 255, 255, 0.12); color: #ffffff; border-color: rgba(255, 255, 255, 0.3);
-    }}
-    body[data-mode="slides"] button[aria-pressed="true"] {{
-      background: #0d9488; color: #ffffff; border-color: #0d9488; font-weight: 600;
-      box-shadow: 0 0 12px rgba(13, 148, 136, 0.4);
-    }}
-    body[data-mode="slides"] .document {{
-      width: 100vw; height: calc(100vh - 59px); margin: 0; padding: 0;
-      overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
-    }}
-    body[data-mode="slides"] article {{
-      display: flex; width: max-content; height: 100%; border: 0; box-shadow: none; background: transparent;
-    }}
-    body[data-mode="slides"] .section-block {{
-      display: flex; flex-direction: column; justify-content: center;
-      width: 100vw; height: 100%; padding: clamp(40px, 8vw, 100px);
-      overflow-y: auto; scroll-snap-align: start; border: 0;
-      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
-      box-shadow: inset 0 0 80px rgba(15, 118, 110, 0.03);
-    }}
-    body[data-mode="slides"] .section-layout {{
-      grid-template-columns: minmax(0, 1fr) minmax(320px, 36vw);
-      gap: clamp(32px, 6vw, 88px);
-      align-items: center;
-      min-height: 65vh;
-    }}
-    body[data-mode="slides"] .section-visual {{
-      min-height: min(46vh, 380px);
-      border: 1px solid rgba(20, 184, 166, 0.12);
-      border-radius: 20px;
-      background: #ffffff;
-      padding: clamp(20px, 3vw, 36px);
-      box-shadow: 0 20px 40px -12px rgba(15, 118, 110, 0.08), 0 1px 3px rgba(15, 118, 110, 0.02);
-    }}
-    body[data-mode="slides"] .section-visual svg {{ max-width: 340px; }}
-    body[data-mode="slides"] .section-visual img {{
-      max-width: min(540px, 100%);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-    }}
-    body[data-mode="slides"] .section-visual figcaption {{
-      font-size: clamp(13px, 1.1vw, 16px);
-      color: #475569;
-      background: #f1f5f9;
-      padding: 6px 12px;
-      border-radius: 6px;
-      display: inline-block;
-      margin-top: 14px;
-    }}
-    body[data-mode="slides"] .doc-cover {{
-      background: linear-gradient(135deg, #e6fffa 0%, #e0f2fe 100%);
-    }}
-    body[data-mode="slides"] h1 {{
-      max-width: 1100px;
-      font-size: clamp(38px, 5.2vw, 68px);
-      font-weight: 800;
-      color: #0f172a;
-      line-height: 1.25;
-      letter-spacing: -0.02em;
-    }}
-    body[data-mode="slides"] h2 {{
-      margin-bottom: clamp(24px, 3.5vw, 42px);
-      padding-left: 20px;
-      border-left: 8px solid #0d9488;
-      border-radius: 4px;
-      font-size: clamp(30px, 3.8vw, 46px);
-      font-weight: 700;
-      color: #0f172a;
-      line-height: 1.3;
-      letter-spacing: -0.01em;
-    }}
-    body[data-mode="slides"] .section-block.has-slide-summary .section-text > :not(h2):not(.slide-summary) {{ display: none; }}
-    body[data-mode="slides"] .slide-summary {{ display: block; font-weight: 500; color: #0f766e; }}
-    body[data-mode="slides"] h3 {{
-      font-size: clamp(20px, 2.2vw, 28px);
-      color: #0d9488;
-      margin-top: 24px;
-      margin-bottom: 12px;
-      font-weight: 700;
-    }}
-    body[data-mode="slides"] p, body[data-mode="slides"] li {{
-      max-width: 1100px;
-      font-size: clamp(19px, 1.8vw, 26px);
-      line-height: 1.6;
-      color: #334155;
-    }}
-    body[data-mode="slides"] li {{
-      position: relative;
-      padding-left: 1.6em;
-      list-style-type: none;
-      margin: 10px 0;
-    }}
-    body[data-mode="slides"] li::before {{
-      content: "•";
-      color: #0d9488;
-      font-weight: bold;
-      display: inline-block;
-      width: 1em;
-      margin-left: -1em;
-      font-size: 1.3em;
-      vertical-align: middle;
-      position: absolute;
-      left: 0.8em;
-      top: -0.05em;
-    }}
-    body[data-mode="slides"] .lead {{
-      font-size: clamp(22px, 2.2vw, 30px);
-      line-height: 1.65;
-      color: #334155;
-      font-weight: 500;
-    }}
-    body[data-mode="slides"] .step-list, body[data-mode="slides"] .risk-grid {{
-      grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 20px;
-      margin-top: 18px;
-    }}
-    body[data-mode="slides"] .note, body[data-mode="slides"] .urgent,
-    body[data-mode="slides"] .step-list section, body[data-mode="slides"] .risk-grid section {{
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(20, 184, 166, 0.12);
-      border-radius: 16px;
-      padding: clamp(20px, 2.5vw, 32px);
-      box-shadow: 0 10px 30px -10px rgba(15, 118, 110, 0.06), 0 1px 3px rgba(15, 118, 110, 0.02);
-      backdrop-filter: blur(12px);
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    }}
-    body[data-mode="slides"] .step-list section:hover,
-    body[data-mode="slides"] .risk-grid section:hover {{
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px -15px rgba(15, 118, 110, 0.12);
-      border-color: rgba(20, 184, 166, 0.3);
-    }}
-    body[data-mode="slides"] .note {{
-      border-left: 8px solid #d97706;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(254, 243, 199, 0.4) 100%);
-    }}
-    body[data-mode="slides"] .urgent {{
-      border-left: 8px solid #b42318;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(254, 226, 226, 0.4) 100%);
-      border-color: rgba(180, 35, 24, 0.12);
-    }}
-    .slide-pagination {{ display: none; }}
-    body[data-mode="slides"] .slide-pagination {{
-      position: fixed; right: 30px; bottom: 24px; z-index: 20;
-      display: flex; align-items: center; gap: 16px; min-width: 168px; justify-content: center;
-      padding: 10px 16px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 30px;
-      background: rgba(11, 19, 41, 0.88); color: #f8fafc; font-size: 15px; line-height: 1;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); backdrop-filter: blur(10px);
-    }}
-    body[data-mode="slides"] .slide-nav {{
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 36px; height: 36px; min-height: 36px; padding: 0;
-      border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 20px; line-height: 1;
-      cursor: pointer; transition: all 0.2s ease;
-    }}
-    body[data-mode="slides"] .slide-nav:hover {{
-      background: #0d9488; color: #ffffff; border-color: #0d9488;
-      box-shadow: 0 0 8px rgba(13, 148, 136, 0.5);
-    }}
-    @media print {{ .slide-pagination {{ display: none !important; }} }}
+  <meta name="source" content="{html.escape(source_name)}">
+  <meta name="generated" content="{generated_at}">
+  <title>{safe_title}</title>
+  <style>
+    :root {{ --teal:#0f766e; --teal-dark:#115e59; --ink:#1f2933; --muted:#52606d; --line:#d9e2ec; --paper:#fff; --panel:#f6fbfa; --urgent:#b42318; --urgent-bg:#fff1f0; }}
+    * {{ box-sizing:border-box; }} body {{ margin:0; color:var(--ink); background:#eef3f7; font-family:"Yu Gothic","YuGothic","Meiryo",sans-serif; font-size:17px; line-height:1.8; }}
+    .bar {{ padding:12px 20px; color:#fff; background:var(--teal-dark); font-size:14px; }} .document {{ width:min(100%,960px); margin:28px auto 64px; background:var(--paper); box-shadow:0 14px 35px rgba(31,41,51,.10); }}
+    header {{ padding:44px 52px 32px; border-bottom:1px solid var(--line); background:linear-gradient(135deg,#fff 0%,#edf8f6 100%); }} .eyebrow {{ margin:0 0 10px; color:var(--teal-dark); font-size:14px; font-weight:700; letter-spacing:.05em; }} h1 {{ margin:0; color:var(--ink); font-size:clamp(28px,4vw,42px); line-height:1.35; }}
+    main {{ padding:12px 52px 42px; }} h2 {{ margin:42px 0 16px; padding-left:14px; border-left:6px solid var(--teal); color:var(--teal-dark); font-size:25px; line-height:1.4; }} h3 {{ margin:28px 0 10px; color:var(--teal-dark); font-size:19px; }} p {{ margin:0 0 16px; }} ul {{ margin:0 0 20px; padding-left:1.45em; }} li {{ margin:6px 0; }} strong {{ color:#153e3b; }} blockquote {{ margin:20px 0; padding:12px 18px; border-left:4px solid #93c5bd; background:var(--panel); color:var(--muted); }}
+    .callout {{ margin:24px 0; padding:16px 18px; border-left:6px solid var(--teal); background:var(--panel); }} .callout.important {{ border-color:var(--urgent); background:var(--urgent-bg); }} .callout p {{ margin:0; }} .callout-label {{ margin-bottom:5px !important; color:var(--teal-dark); font-size:13px; font-weight:700; letter-spacing:.06em; }} .important .callout-label {{ color:var(--urgent); }} figure {{ margin:28px auto; text-align:center; }} figure img {{ max-width:100%; max-height:520px; border:1px solid var(--line); border-radius:10px; background:#fff; }} figcaption {{ margin-top:8px; color:var(--muted); font-size:14px; }} footer {{ padding:18px 52px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }}
+    @media print {{ body {{ background:#fff; }} .bar {{ display:none; }} .document {{ width:100%; margin:0; box-shadow:none; }} }} @media (max-width:640px) {{ .document {{ margin:0; }} header,main,footer {{ padding-left:22px; padding-right:22px; }} body {{ font-size:16px; }} }}
   </style>
 </head>
 <body>
-  <header class="app-toolbar" aria-label="表示切り替え">
-    <div class="toolbar-title">{title}</div>
-    <div class="toolbar-actions">
-      <button type="button" data-mode="screen" aria-pressed="true">画面</button>
-      <button type="button" data-mode="large" aria-pressed="false">高齢者印刷</button>
-      <button type="button" data-mode="compact" aria-pressed="false">紙節約印刷</button>
-      <button type="button" data-mode="slides" aria-pressed="false">スライド</button>
-      <button type="button" data-action="print">印刷/PDF</button>
-    </div>
-  </header>
-
-  <main class="document" id="top">
-    <article>
-{content}
-    </article>
-  </main>
-
-  <div class="slide-pagination" aria-live="polite" aria-label="スライド番号">
-    <button type="button" class="slide-nav" data-slide-nav="prev" aria-label="前のスライド">‹</button>
-    <span><span id="current-slide">1</span> / <span id="total-slides">1</span></span>
-    <button type="button" class="slide-nav" data-slide-nav="next" aria-label="次のスライド">›</button>
-  </div>
-
-  <script>
-    const printLarge = document.getElementById("print-large-css");
-    const printCompact = document.getElementById("print-compact-css");
-    const slides = document.getElementById("slides-css");
-    const buttons = document.querySelectorAll("[data-mode]");
-    const documentFrame = document.querySelector(".document");
-    const slideBlocks = Array.from(document.querySelectorAll(".section-block"));
-    const currentSlide = document.getElementById("current-slide");
-    const totalSlides = document.getElementById("total-slides");
-    let activeSlideIndex = 0;
-
-    function setMode(mode) {{
-      document.body.dataset.mode = mode;
-      printLarge.media = mode === "large" ? "all" : (mode === "screen" || mode === "slides" ? "print" : "not all");
-      printCompact.media = mode === "compact" ? "all" : "not all";
-      slides.media = mode === "slides" ? "screen" : "not all";
-      buttons.forEach((button) => {{
-        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
-      }});
-      if (mode === "slides") {{
-        goToSlide(activeSlideIndex);
-      }}
-    }}
-
-    function updatePagination(index) {{
-      activeSlideIndex = Math.max(0, Math.min(index, slideBlocks.length - 1));
-      currentSlide.textContent = String(activeSlideIndex + 1);
-      totalSlides.textContent = String(slideBlocks.length);
-    }}
-
-    function goToSlide(index) {{
-      updatePagination(index);
-      documentFrame.scrollTo({{
-        left: activeSlideIndex * documentFrame.clientWidth,
-        behavior: "smooth"
-      }});
-    }}
-
-    function syncPaginationFromScroll() {{
-      if (document.body.dataset.mode !== "slides") return;
-      const width = Math.max(1, documentFrame.clientWidth);
-      updatePagination(Math.round(documentFrame.scrollLeft / width));
-    }}
-
-    buttons.forEach((button) => {{
-      button.addEventListener("click", () => setMode(button.dataset.mode));
-    }});
-
-    document.querySelector("[data-slide-nav='prev']").addEventListener("click", () => {{
-      goToSlide(activeSlideIndex - 1);
-    }});
-
-    document.querySelector("[data-slide-nav='next']").addEventListener("click", () => {{
-      goToSlide(activeSlideIndex + 1);
-    }});
-
-    document.addEventListener("keydown", (event) => {{
-      if (document.body.dataset.mode !== "slides") return;
-      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {{
-        event.preventDefault();
-        goToSlide(activeSlideIndex + 1);
-      }}
-      if (event.key === "ArrowLeft" || event.key === "PageUp") {{
-        event.preventDefault();
-        goToSlide(activeSlideIndex - 1);
-      }}
-      if (event.key === "Home") {{
-        event.preventDefault();
-        goToSlide(0);
-      }}
-      if (event.key === "End") {{
-        event.preventDefault();
-        goToSlide(slideBlocks.length - 1);
-      }}
-    }});
-
-    documentFrame.addEventListener("scroll", syncPaginationFromScroll);
-    window.addEventListener("resize", () => {{
-      if (document.body.dataset.mode === "slides") {{
-        goToSlide(activeSlideIndex);
-      }}
-    }});
-
-    document.querySelector("[data-action='print']").addEventListener("click", () => {{
-      window.print();
-    }});
-
-    updatePagination(0);
-    setMode("screen");
-  </script>
+  <div class="bar">患者説明文書　|　試作・閲覧版　|　医学的内容は医師が確認します</div>
+  <article class="document">
+    <header><p class="eyebrow">PATIENT INFORMATION　{html.escape(status or 'draft')}</p><h1>{safe_title}</h1></header>
+    <main>{body_html}</main>
+    <footer>正本: {html.escape(source_name)}　／　生成日時: {generated_at}</footer>
+  </article>
 </body>
-</html>
-"""
-
-
-# Markdownのパースとセクション分割ロジック
-def parse_markdown_to_sections(md_text):
-    import datetime
-
-    lines = md_text.splitlines()
-
-    # 1. フロントマター (YAML) の抽出
-    title = "患者説明資料"
-    description = ""
-    start_idx = 0
-    metadata = {
-        "reviewed_by": "",
-        "review_date": "",
-        "evidence_source": "",
-        "change_reason": "",
-        "version": "",
-        "diagnosis": "",
-        "procedure_name": "",
-        "anesthesia": "",
-        "laterality": "",
-        "document_type": "",
-        "print_consent": "true",
-    }
-
-    if len(lines) > 0 and lines[0].strip() == "---":
-        fm_lines = []
-        for i in range(1, len(lines)):
-            if lines[i].strip() == "---":
-                start_idx = i + 1
-                break
-            fm_lines.append(lines[i])
-
-        # フロントマターの解析
-        for line in fm_lines:
-            m_title = re.match(r"^title:\s*(.*)$", line)
-            if m_title:
-                title = m_title.group(1).strip().strip('"').strip("'")
-                continue
-            m_desc = re.match(r"^description:\s*(.*)$", line)
-            if m_desc:
-                description = m_desc.group(1).strip().strip('"').strip("'")
-                continue
-
-            # その他の追跡メタデータを抽出
-            for key in metadata.keys():
-                m_meta = re.match(rf"^{key}:\s*(.*)$", line)
-                if m_meta:
-                    metadata[key] = m_meta.group(1).strip().strip('"').strip("'")
-                    break
-
-    metadata["build_datetime"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    body_lines = lines[start_idx:]
-
-    # 2. 最初にあるH1 (# タイトル) を抽出し、フロントマターにタイトルがない場合はそれをタイトルにする
-    content_lines = []
-    for line in body_lines:
-        if line.startswith("# ") or line.startswith("# **"):
-            # H1は表紙タイトルとして扱い、本文には重複表示しない
-            if title == "患者説明資料":
-                raw_title = line.replace("#", "").replace("**", "").strip()
-                if raw_title:
-                    title = raw_title
-            continue
-        content_lines.append(line)
-
-    # 3. 行ごとに解析してHTMLセクションに分類
-    sections = []
-    current_section_content = []
-    current_section_title = ""
-    current_section_slide_summary = ""
-    is_cover = True  # 最初のH2に到達するまではカバーセクション
-
-    # リスト状態管理
-    in_ul = False
-    in_ol = False
-    in_p = False
-    in_note = False
-    in_urgent = False
-
-    def close_all_tags(content_list):
-        nonlocal in_ul, in_ol, in_p, in_note, in_urgent
-        out = []
-        if in_ul:
-            out.append("        </ul>")
-            in_ul = False
-        if in_ol:
-            out.append("        </ol>")
-            in_ol = False
-        if in_p:
-            out.append("        </p>")
-            in_p = False
-        if in_note or in_urgent:
-            out.append("        </div>")
-            in_note = False
-            in_urgent = False
-        if out:
-            content_list.extend(out)
-
-    for line in content_lines:
-        cleaned_line = line.strip()
-
-        # H2見出し (セクションの境界)
-        if cleaned_line.startswith("##") and not cleaned_line.startswith("###"):
-            h2_text = re.sub(r"^##\s*", "", cleaned_line).replace("**", "").strip()
-            # 空の H2 (## のみ等) は無視して完全に除外する
-            if not h2_text:
-                continue
-
-            # 既存のセクションをクローズして保存
-            close_all_tags(current_section_content)
-
-            if is_cover:
-                # カバーセクションを保存
-                sections.append(
-                    {
-                        "is_cover": True,
-                        "title": title,
-                        "slide_summary": current_section_slide_summary,
-                        "content": "\n".join(current_section_content),
-                    }
-                )
-                is_cover = False
-            else:
-                # 通常セクションを保存
-                sections.append(
-                    {
-                        "is_cover": False,
-                        "title": current_section_title,
-                        "slide_summary": current_section_slide_summary,
-                        "content": "\n".join(current_section_content),
-                    }
-                )
-
-            # 新しいセクションをスタート
-            current_section_content = []
-            current_section_title = h2_text
-            current_section_slide_summary = ""
-            current_section_content.append(f"      <h2>{h2_text}</h2>")
-            continue
-
-        if re.match(r"^(?:>\s*)?\{\{visual:\s*[a-zA-Z0-9_-]+\s*\}\}$", cleaned_line):
-            # 旧原稿との互換性のため図版指定は読み飛ばす。
-            continue
-
-        if re.match(r"^!\[.*?\]\(.*?\)$", cleaned_line):
-            # Markdownの画像指定も出力せず、本文だけをHTML化する。
-            continue
-
-        slide_summary_match = re.match(
-            r"^(?:>\s*)?\{\{slide_summary:\s*(.*?)\s*\}\}$", cleaned_line
-        )
-        if slide_summary_match:
-            current_section_slide_summary = format_inline_elements(
-                slide_summary_match.group(1).strip()
-            )
-            continue
-
-        # 空行
-        if not cleaned_line:
-            if in_p:
-                current_section_content.append("        </p>")
-                in_p = False
-            continue
-
-        # リストマークアップのクローズ判定
-        is_list_line = (
-            cleaned_line.startswith("- ")
-            or cleaned_line.startswith("* ")
-            or cleaned_line.startswith("+ ")
-            or re.match(r"^\d+\.\s+", cleaned_line)
-        )
-
-        if not is_list_line:
-            if in_ul:
-                current_section_content.append("        </ul>")
-                in_ul = False
-            if in_ol:
-                current_section_content.append("        </ol>")
-                in_ol = False
-
-        # 箇条書きリスト (UL)
-        if (
-            cleaned_line.startswith("- ")
-            or cleaned_line.startswith("* ")
-            or cleaned_line.startswith("+ ")
-        ):
-            if not in_ul:
-                # Pがオープンしていれば閉じる
-                if in_p:
-                    current_section_content.append("        </p>")
-                    in_p = False
-                current_section_content.append("        <ul>")
-                in_ul = True
-            list_text = re.sub(r"^[-*+]\s+", "", cleaned_line)
-            list_text = format_inline_elements(list_text)
-            current_section_content.append(f"          <li>{list_text}</li>")
-            continue
-
-        # 番号付きリスト (OL)
-        ol_match = re.match(r"^(\d+)\.\s+(.*)$", cleaned_line)
-        if ol_match:
-            if not in_ol:
-                if in_p:
-                    current_section_content.append("        </p>")
-                    in_p = False
-                current_section_content.append("        <ol>")
-                in_ol = True
-            list_text = format_inline_elements(ol_match.group(2))
-            current_section_content.append(f"          <li>{list_text}</li>")
-            continue
-
-        # H3中見出し
-        if cleaned_line.startswith("###"):
-            h3_text = re.sub(r"^###\s*", "", cleaned_line).replace("**", "").strip()
-            if not h3_text:
-                continue
-            close_all_tags(current_section_content)
-            current_section_content.append(f"        <h3>{h3_text}</h3>")
-            continue
-
-        # 注記 / コールアウト (引出し線・引用)
-        if cleaned_line.startswith("> "):
-            quote_text = cleaned_line.replace("> ", "").strip()
-
-            # 特別な警告コールアウトか？
-            is_warning = (
-                quote_text.startswith("[!NOTE]")
-                or quote_text.startswith("[!TIP]")
-                or quote_text.startswith("[!IMPORTANT]")
-            )
-            is_urgent = quote_text.startswith("[!WARNING]") or quote_text.startswith(
-                "[!CAUTION]"
-            )
-
-            if is_warning:
-                close_all_tags(current_section_content)
-                current_section_content.append('        <div class="note">')
-                in_note = True
-                continue
-            elif is_urgent:
-                close_all_tags(current_section_content)
-                current_section_content.append('        <div class="note urgent">')
-                in_urgent = True
-                continue
-
-            # 通常の引用行
-            if not (in_note or in_urgent):
-                # デフォルトで注記パネルに入れる
-                close_all_tags(current_section_content)
-                current_section_content.append('        <div class="note">')
-                in_note = True
-
-            quote_text = format_inline_elements(quote_text)
-            current_section_content.append(f"          <p>{quote_text}</p>")
-            continue
-
-        # 引用ブロックが途切れたら閉じる
-        if not cleaned_line.startswith("> ") and (in_note or in_urgent):
-            current_section_content.append("        </div>")
-            in_note = False
-            in_urgent = False
-
-        # 通常の文章（段落）
-        line_text = format_inline_elements(cleaned_line)
-        if not in_p:
-            current_section_content.append("        <p>")
-            in_p = True
-        current_section_content.append(f"          {line_text}")
-
-    # 残ったタグを閉じる
-    close_all_tags(current_section_content)
-
-    # 最後のセクションを保存
-    if is_cover:
-        sections.append(
-            {
-                "is_cover": True,
-                "title": title,
-                "slide_summary": current_section_slide_summary,
-                "content": "\n".join(current_section_content),
-            }
-        )
-    else:
-        sections.append(
-            {
-                "is_cover": False,
-                "title": current_section_title,
-                "slide_summary": current_section_slide_summary,
-                "content": "\n".join(current_section_content),
-            }
-        )
-
-    return title, description, sections, metadata
-
-
-# インライン要素（太字、斜体、改行）のフォーマット
-def format_inline_elements(text):
-    # 太字: **text** または __text__ -> <strong>
-    text = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", text)
-    text = re.sub(r"__([^_]+)__", r"<strong>\1</strong>", text)
-    # 改行記号: `  ` (スペース2つ) または `~` または `<br>` -> <br>
-    text = text.replace("  ", "<br>")
-    text = text.replace("~", "<br>")
-    return text
-
-
-def get_doc_category(title, metadata):
-    """文書のタイトルやメタデータから疾患カテゴリを自動判定する。"""
-    title_str = (
-        ((title or "") + " " + (metadata.get("diagnosis") or "") + " " + (metadata.get("procedure_name") or ""))
-        .lower()
-    )
-    if any(kw in title_str for kw in ["真珠腫", "cholesteatoma", "中耳", "鼓室"]):
-        return "cholesteatoma"
-    elif any(kw in title_str for kw in ["副鼻腔", "sinusitis", "鼻タケ", "鼻ポリープ", "ess"]):
-        return "sinusitis"
-    else:
-        return "general"
-
-
-def section_visual_svg(visual_key, category):
-    """Markdownで指定された図版キーとカテゴリに対応する説明用模式図（内蔵SVG）を返す。"""
-    if category != "cholesteatoma":
-        # 真珠腫関連以外の文書では真珠腫のSVGフォールバックを行わない
-        return ""
-
-    visuals = {
-        "cover": """<svg viewBox="0 0 360 260" role="img" aria-label="耳の構造と真珠腫説明資料の表紙図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <path d="M42 148c28-68 84-104 158-94 62 8 101 49 110 113" fill="none" stroke="#bfdbfe" stroke-width="22" stroke-linecap="round"/>
-  <path d="M92 156c44-28 93-32 144-10" fill="none" stroke="#94a3b8" stroke-width="13" stroke-linecap="round"/>
-  <circle cx="223" cy="116" r="32" fill="#fde68a" stroke="#d97706" stroke-width="6"/>
-  <text x="223" y="121" text-anchor="middle" font-size="15" fill="#78350f">真珠腫</text>
-  <text x="180" y="226" text-anchor="middle" font-size="18" fill="#0f766e">耳の奥を見ながら説明します</text>
-</svg>""",
-        "cholesteatoma-growth": """<svg viewBox="0 0 360 260" role="img" aria-label="鼓膜のへこみから真珠腫が耳小骨へ広がる図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <text x="38" y="34" font-size="16" fill="#0f766e">外耳道</text>
-  <text x="167" y="34" font-size="16" fill="#0f766e">鼓膜</text>
-  <text x="258" y="34" font-size="16" fill="#0f766e">中耳</text>
-  <path d="M34 132h104" stroke="#93c5fd" stroke-width="34" stroke-linecap="round"/>
-  <path d="M152 72c28 36 28 82 0 118" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round"/>
-  <path d="M159 96c30 18 50 28 77 28" fill="none" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
-  <circle cx="235" cy="124" r="31" fill="#fde68a" stroke="#d97706" stroke-width="6"/>
-  <path d="M247 116c31-11 51-8 68 9" fill="none" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/>
-  <text x="236" y="130" text-anchor="middle" font-size="14" fill="#78350f">真珠腫</text>
-  <text x="278" y="160" text-anchor="middle" font-size="15" fill="#dc2626">骨を溶かす</text>
-</svg>""",
-        "surgery-purpose": """<svg viewBox="0 0 360 260" role="img" aria-label="真珠腫を取り除き合併症を防ぐ図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <circle cx="112" cy="122" r="45" fill="#fde68a" stroke="#d97706" stroke-width="6"/>
-  <text x="112" y="127" text-anchor="middle" font-size="16" fill="#78350f">真珠腫</text>
-  <path d="M168 122h58" stroke="#0f766e" stroke-width="9" stroke-linecap="round"/>
-  <path d="M211 99l26 23-26 23" fill="none" stroke="#0f766e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="248" y="77" width="68" height="90" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="6"/>
-  <path d="M266 124l14 14 26-36" fill="none" stroke="#16a34a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="180" y="215" text-anchor="middle" font-size="18" fill="#0f766e">取り除いて進行を止める</text>
-</svg>""",
-        "surgical-approaches": """<svg viewBox="0 0 360 260" role="img" aria-label="真珠腫の広がりに応じた術式選択図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <g font-size="13" fill="#0f172a" text-anchor="middle">
-    <rect x="22" y="56" width="72" height="104" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="4"/>
-    <text x="58" y="48">浅い</text><path d="M40 118h36" stroke="#2563eb" stroke-width="9" stroke-linecap="round"/>
-    <rect x="106" y="56" width="72" height="104" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="4"/>
-    <text x="142" y="48">奥へ</text><path d="M124 118h36" stroke="#0891b2" stroke-width="9" stroke-linecap="round"/><circle cx="158" cy="112" r="13" fill="#fde68a" stroke="#d97706" stroke-width="4"/>
-    <rect x="190" y="56" width="72" height="104" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="4"/>
-    <text x="226" y="48">壁を再建</text><path d="M204 118h44" stroke="#16a34a" stroke-width="9" stroke-linecap="round"/><path d="M226 82v70" stroke="#64748b" stroke-width="5"/>
-    <rect x="274" y="56" width="72" height="104" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="4"/>
-    <text x="310" y="48">開放型</text><path d="M288 118h44" stroke="#ea580c" stroke-width="9" stroke-linecap="round"/><path d="M314 84c17 26 17 53 0 79" fill="none" stroke="#ea580c" stroke-width="5"/>
-  </g>
-  <text x="180" y="215" text-anchor="middle" font-size="17" fill="#0f766e">広がりで安全な方法を選ぶ</text>
-</svg>""",
-        "reconstruction": """<svg viewBox="0 0 360 260" role="img" aria-label="鼓膜と耳小骨を軟骨や筋膜で再建する図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <path d="M70 132h92" stroke="#93c5fd" stroke-width="30" stroke-linecap="round"/>
-  <path d="M174 76c30 35 30 78 0 113" fill="none" stroke="#2563eb" stroke-width="9" stroke-linecap="round"/>
-  <circle cx="210" cy="125" r="14" fill="#cbd5e1" stroke="#64748b" stroke-width="5"/>
-  <circle cx="246" cy="125" r="14" fill="#cbd5e1" stroke="#64748b" stroke-width="5"/>
-  <path d="M211 125h35" stroke="#64748b" stroke-width="6"/>
-  <path d="M159 111l47-22 14 26-48 22z" fill="#bbf7d0" stroke="#16a34a" stroke-width="5"/>
-  <text x="192" y="79" text-anchor="middle" font-size="14" fill="#166534">軟骨・筋膜</text>
-  <text x="232" y="160" text-anchor="middle" font-size="14" fill="#475569">耳小骨</text>
-  <text x="180" y="215" text-anchor="middle" font-size="17" fill="#0f766e">必要なら聞こえの道を作り直す</text>
-</svg>""",
-        "recurrence-types": """<svg viewBox="0 0 360 260" role="img" aria-label="遺残と再形成の2種類の再発を示す図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <rect x="28" y="54" width="138" height="124" rx="14" fill="#fefce8" stroke="#ca8a04" stroke-width="5"/>
-  <text x="97" y="82" text-anchor="middle" font-size="18" fill="#854d0e">遺残</text>
-  <circle cx="97" cy="121" r="10" fill="#fde68a" stroke="#d97706" stroke-width="5"/>
-  <path d="M97 137c0 18 0 28 0 42" stroke="#d97706" stroke-width="5" stroke-dasharray="6 6"/>
-  <rect x="194" y="54" width="138" height="124" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="5"/>
-  <text x="263" y="82" text-anchor="middle" font-size="18" fill="#1d4ed8">再形成</text>
-  <path d="M232 109c25 4 46 2 65-8" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
-  <path d="M267 104c-18 18-23 37-13 57" fill="none" stroke="#d97706" stroke-width="7" stroke-linecap="round"/>
-  <text x="180" y="220" text-anchor="middle" font-size="17" fill="#0f766e">種類が違うため長期通院が必要</text>
-</svg>""",
-        "sniffing-pressure": """<svg viewBox="0 0 360 260" role="img" aria-label="鼻すすりで鼓膜が内側へ引き込まれる図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <text x="84" y="56" text-anchor="middle" font-size="15" fill="#0f766e">鼻すすり</text>
-  <path d="M95 78c45 0 72 19 94 54" fill="none" stroke="#0284c7" stroke-width="8" stroke-linecap="round" stroke-dasharray="8 8"/>
-  <path d="M181 111l12 26-29-2" fill="#0284c7"/>
-  <path d="M215 72c31 40 31 82 0 122" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round"/>
-  <path d="M214 96c-32 17-45 40-40 69" fill="none" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/>
-  <text x="255" y="132" font-size="15" fill="#dc2626">鼓膜がへこむ</text>
-  <text x="180" y="220" text-anchor="middle" font-size="17" fill="#0f766e">陰圧が再形成の原因になる</text>
-</svg>""",
-        "complications": """<svg viewBox="0 0 360 260" role="img" aria-label="耳の周囲にある顔面神経や内耳へのリスク図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <path d="M78 137c31-58 76-82 134-66 42 12 65 44 69 91" fill="none" stroke="#bfdbfe" stroke-width="20" stroke-linecap="round"/>
-  <circle cx="210" cy="125" r="25" fill="#fde68a" stroke="#d97706" stroke-width="5"/>
-  <path d="M254 84c29 26 30 62 2 91" fill="none" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/>
-  <text x="279" y="80" font-size="14" fill="#dc2626">顔面神経</text>
-  <path d="M286 138c20-17 34-16 43 2s-2 34-24 34" fill="none" stroke="#7c3aed" stroke-width="7" stroke-linecap="round"/>
-  <text x="282" y="199" font-size="14" fill="#6d28d9">内耳</text>
-  <text x="180" y="226" text-anchor="middle" font-size="17" fill="#0f766e">近くの神経・内耳に注意</text>
-</svg>""",
-        "red-flags": """<svg viewBox="0 0 360 260" role="img" aria-label="退院後すぐ連絡すべき赤信号症状の図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <path d="M180 42l88 154H92z" fill="#fee2e2" stroke="#dc2626" stroke-width="8" stroke-linejoin="round"/>
-  <path d="M180 95v54" stroke="#dc2626" stroke-width="13" stroke-linecap="round"/>
-  <circle cx="180" cy="171" r="8" fill="#dc2626"/>
-  <g font-size="14" fill="#991b1b">
-    <text x="35" y="68">強いめまい</text>
-    <text x="253" y="68">顔の麻痺</text>
-    <text x="36" y="218">高熱・頭痛</text>
-    <text x="245" y="218">透明な耳だれ</text>
-  </g>
-</svg>""",
-        "follow-up": """<svg viewBox="0 0 360 260" role="img" aria-label="術後の耳の安静と定期通院の図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <rect x="68" y="58" width="224" height="142" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="5"/>
-  <path d="M96 101h168M96 141h168" stroke="#cbd5e1" stroke-width="5"/>
-  <circle cx="118" cy="101" r="13" fill="#ccfbf1" stroke="#0f766e" stroke-width="5"/>
-  <path d="M111 101l6 7 13-18" fill="none" stroke="#0f766e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="118" cy="141" r="13" fill="#ccfbf1" stroke="#0f766e" stroke-width="5"/>
-  <path d="M111 141l6 7 13-18" fill="none" stroke="#0f766e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="180" y="226" text-anchor="middle" font-size="17" fill="#0f766e">安静と定期チェック</text>
-</svg>""",
-        "child-ear-growth": """<svg viewBox="0 0 360 260" role="img" aria-label="小児の乳突蜂巣の発育と中耳炎の影響を示す図">
-  <rect width="360" height="260" rx="18" fill="#ffffff"/>
-  <text x="100" y="50" text-anchor="middle" font-size="15" fill="#0f766e">発育良好</text>
-  <circle cx="100" cy="119" r="55" fill="#dbeafe" stroke="#2563eb" stroke-width="5"/>
-  <g fill="#ffffff" stroke="#60a5fa" stroke-width="3">
-    <circle cx="79" cy="105" r="10"/><circle cx="105" cy="93" r="12"/><circle cx="123" cy="120" r="11"/><circle cx="91" cy="139" r="12"/>
-  </g>
-  <text x="260" y="50" text-anchor="middle" font-size="15" fill="#b45309">発育不良</text>
-  <circle cx="260" cy="119" r="55" fill="#ffedd5" stroke="#ea580c" stroke-width="5"/>
-  <path d="M226 119h68" stroke="#ea580c" stroke-width="13" stroke-linecap="round"/>
-  <text x="180" y="226" text-anchor="middle" font-size="17" fill="#0f766e">子どもは耳の成長も守る</text>
-</svg>""",
-    }
-    return visuals.get(visual_key, "")
-
-
-def find_image_file(filename):
-    """指定されたファイル名に一致する画像を images 配下から再帰的に探索する。
-    優先順位: 1. optimized, 2. master, 3. draft
-    """
-    search_dirs = [
-        os.path.join(base_dir, "images", "optimized"),
-        os.path.join(base_dir, "images", "master"),
-        os.path.join(base_dir, "images", "draft")
-    ]
-    for s_dir in search_dirs:
-        if not os.path.exists(s_dir):
-            continue
-        for root, dirs, files in os.walk(s_dir):
-            if filename in files:
-                return os.path.join(root, filename)
-    return None
-
-
-def encode_image_to_base64(filepath):
-    """指定された画像ファイルをBase64エンコードしてデータURI形式で返す。"""
-    try:
-        with open(filepath, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-            mime_type, _ = mimetypes.guess_type(filepath)
-            if not mime_type:
-                mime_type = "image/png"  # フォールバック
-            return f"data:{mime_type};base64,{encoded_string}"
-    except Exception as e:
-        print(f"WARNING: Failed to encode image {filepath} to base64: {e}")
-        return None
-
-
-def get_section_visual_element(visual_key, inline=False, title="", metadata=None):
-    """図版キーに対応するビジュアル要素（HTMLマークアップ）を生成する。
-    画像が見つかった場合は img タグを（inline=True の場合はBase64化して）出力する。
-    画像が見つからない場合は、定義済みのSVGコードへフォールバックする。
-    両方ない場合は空の文字列を返す。
-    """
-    if metadata is None:
-        metadata = {}
-
-    category = get_doc_category(title, metadata)
-
-    visuals_by_category = {
-        "cholesteatoma": {
-            "cover": ("cholesteatoma-growth.png", "真珠腫が中耳で広がる位置関係の模式図"),
-            "cholesteatoma-growth": (
-                "cholesteatoma-growth.png",
-                "鼓膜の奥に真珠腫ができ、耳小骨や周囲の骨へ近づく様子",
-            ),
-            "surgery-purpose": (
-                "surgery-purpose.png",
-                "耳の後ろ側から病変へ到達し、真珠腫を取り除く考え方",
-            ),
-            "surgical-approaches": (
-                "surgery-purpose.png",
-                "真珠腫の広がりに合わせて安全な手術方法を選びます",
-            ),
-            "reconstruction": (
-                "reconstruction.png",
-                "鼓膜や耳小骨を、軟骨や筋膜で補う再建イメージ",
-            ),
-            "recurrence-types": (
-                "recurrence-types.png",
-                "遺残と再形成という2種類の再発パターン",
-            ),
-            "sniffing-pressure": (
-                "sniffing-pressure.png",
-                "鼻すすりで耳の中に陰圧がかかり、鼓膜が奥へ引かれる仕組み",
-            ),
-            "complications": (
-                "complications-risk.png",
-                "顔面神経や内耳など、真珠腫の近くにある重要な構造",
-            ),
-            "red-flags": (
-                "complications-risk.png",
-                "強いめまい、顔の動きにくさ、聞こえの急な悪化などに注意します",
-            ),
-            "follow-up": (
-                "recurrence-types.png",
-                "手術後も再発確認のため、長期間の定期通院が必要です",
-            ),
-            "child-ear-growth": (
-                "cholesteatoma-growth.png",
-                "小児では耳の成長も考えて治療方針を決めます",
-            ),
-        },
-        "sinusitis": {
-            "cover": ("sinusitis-cover.png", "副鼻腔の構造と炎症の模式図"),
-            "complications": (
-                "sinusitis-complications.png",
-                "手術時に注意すべき眼や脳など周囲の重要な構造",
-            ),
-            "red-flags": (
-                "sinusitis-red-flags.png",
-                "強い頭痛、目の見えにくさ、高熱などの注意すべき症状",
-            ),
-            "follow-up": (
-                "sinusitis-follow-up.png",
-                "術後の定期通院と鼻洗浄による自宅療養",
-            ),
-        },
-        "general": {
-            "cover": ("general-cover.png", "治療説明図"),
-            "larynx-anatomy": ("larynx-anatomy.png", "喉頭の解剖とがんの広がり（模式図）"),
-            "staging-puncture": ("staging-puncture.png", "エコーガイド下穿刺吸引細胞診のイメージ"),
-            "treatment-split": ("treatment-split.png", "リンパ節転移の有無による照射範囲 of 分岐"),
-            "treatment-options": ("treatment-options.png", "治療方針の選択肢（放射線単独療法の推奨）"),
-            "rt-schedule": ("rt-schedule.png", "放射線治療のスケジュール"),
-            "side-effects": ("side-effects.png", "放射線治療に伴う副作用と対策"),
-            "stenosis-mitigation": ("stenosis-mitigation.png", "将来の狭窄リスクに対する緩和・対策（気管切開、胃瘻など）"),
-            "consent-flow": ("consent-flow.png", "同意から治療開始までの流れ"),
-        },
-    }
-
-    category_map = visuals_by_category.get(category, visuals_by_category["general"])
-    item = category_map.get(visual_key)
-    if item:
-        filename, caption = item
-        filepath = find_image_file(filename)
-        if filepath:
-            if inline:
-                src = encode_image_to_base64(filepath)
-                if not src:
-                    rel_path = os.path.relpath(filepath, html_dir).replace('\\', '/')
-                    src = f"../{rel_path}"
-            else:
-                rel_path = os.path.relpath(filepath, html_dir).replace('\\', '/')
-                src = rel_path
-
-            return f"""<figure>
-  <img src="{html.escape(src)}" alt="{html.escape(caption)}">
-  <figcaption>{html.escape(caption)}<br>※AI生成ドラフト。臨床使用前に医師の確認が必要です。</figcaption>
-</figure>"""
-
-    # 画像が見つからなかった場合（または登録されていないキーの場合）、内蔵SVGコードへフォールバック
-    svg_code = section_visual_svg(visual_key, category)
-    if svg_code:
-        return svg_code
-
-    return ""
-
-
-# 同意欄生成関数は廃止されました
-
-
-# セクションのHTMLブロックを生成
-def generate_sections_html(title, description, sections):
-    html_blocks = []
-
-    for sec in sections:
-        slide_summary = sec.get("slide_summary", "")
-        slide_summary_html = (
-            f'            <p class="slide-summary">{slide_summary}</p>'
-            if slide_summary
-            else ""
-        )
-        summary_class = " has-slide-summary" if slide_summary else ""
-        if sec["is_cover"]:
-            # カバーセクションのマークアップ
-            lead_html = (
-                f'        <p class="lead">{description}</p>' if description else ""
-            )
-            block = f"""      <section class="doc-cover section-block{summary_class}">
-        <div class="section-text">
-            <p class="eyebrow">患者さん・ご家族への説明資料</p>
-            <h1>{title}</h1>
-{lead_html}
-{sec["content"]}
-{slide_summary_html}
-        </div>
-      </section>"""
-        else:
-            # 通常セクションのマークアップ
-            block = f"""      <section class="section-block{summary_class}">
-        <div class="section-text">
-{sec["content"]}
-{slide_summary_html}
-        </div>
-      </section>"""
-        html_blocks.append(block)
-
-    return "\n\n".join(html_blocks)
-
-
-# メイン処理：明示されたMarkdownファイルのみ変換
-def convert_all_markdowns(target_names):
-    if not target_names:
-        print("ERROR: 変換するMarkdownファイルを1つ以上指定してください。")
-        return 1
-
-    excluded_filenames = {
-        "README.md",
-        "CHANGELOG.md",
-        "rules.md",
-        "Gitプロジェクト一覧.md",
-        "Patient-information.md",
-    }
-    normalized_targets = []
-    seen_targets = set()
-    for target_name in target_names:
-        filename = os.path.basename(target_name)
-        if not filename.endswith(".md"):
-            filename = f"{filename}.md"
-        if filename not in seen_targets:
-            normalized_targets.append(filename)
-            seen_targets.add(filename)
-
-    excluded_targets = [
-        filename for filename in normalized_targets if filename in excluded_filenames
-    ]
-    if excluded_targets:
-        print("ERROR: 以下のファイルはHTML変換対象外です。")
-        for filename in excluded_targets:
-            print(f" - {filename}")
-        return 1
-
-    md_files = []
-    missing_targets = []
-    for filename in normalized_targets:
-        filepath = os.path.join(base_dir, "src", filename)
-        if os.path.exists(filepath):
-            md_files.append(filepath)
-        else:
-            missing_targets.append(filename)
-
-    if missing_targets:
-        print("ERROR: 以下のMarkdownファイルがsrc配下に見つかりません。")
-        for filename in missing_targets:
-            print(f" - {filename}")
-        return 1
-
-    success_count = 0
-    error_files = []
-
-    print(f"Total target markdown files: {len(md_files)}")
-
-    for filepath in md_files:
-        filename = os.path.basename(filepath)
-
-        print(f"Converting {filename}...")
-        try:
-            with open(filepath, "r", encoding="utf-8") as f:
-                md_text = f.read()
-
-            title, description, sections, metadata = parse_markdown_to_sections(md_text)
-            content_html = generate_sections_html(title, description, sections)
-
-            # 同意確認欄の出力は廃止されました
-
-            # メタデータコメント文字列の生成
-            meta_comments_lines = [
-                "<!--",
-                f"  Meta:reviewed_by: {metadata.get('reviewed_by', '')}",
-                f"  Meta:review_date: {metadata.get('review_date', '')}",
-                f"  Meta:evidence_source: {metadata.get('evidence_source', '')}",
-                f"  Meta:change_reason: {metadata.get('change_reason', '')}",
-                f"  Meta:version: {metadata.get('version', '')}",
-                f"  Meta:build_datetime: {metadata.get('build_datetime', '')}",
-                "-->",
-            ]
-            meta_comments_str = "\n".join(meta_comments_lines)
-
-            # HTMLベーステンプレートに流し込む
-            final_html = html_template.format(
-                title=title,
-                content=content_html,
-                meta_comments=meta_comments_str,
-            )
-
-            # 出力ファイル名を作成 (.md から .html)
-            out_filename = os.path.splitext(filename)[0] + ".html"
-            out_filepath = os.path.join(html_dir, out_filename)
-
-            with open(out_filepath, "w", encoding="utf-8") as out_f:
-                out_f.write(final_html)
-
-            success_count += 1
-        except Exception as e:
-            print(f"ERROR converting {filename}: {e}")
-            error_files.append((filename, str(e)))
-
-    print("\n=== Conversion Result ===")
-    print(f"Successfully converted: {success_count} files.")
-    if error_files:
-        print(f"Failed to convert: {len(error_files)} files.")
-        for name, err in error_files:
-            print(f" - {name}: {err}")
-        return 1
-
-    return 0
+</html>'''
+
+
+def generate(source_path):
+    source_path = os.path.abspath(source_path)
+    with open(source_path, encoding="utf-8") as file:
+        metadata, body = front_matter_and_body(file.read())
+    blocks = parse_blocks(body, os.path.dirname(source_path))
+    title = metadata.get("title") or next((content for kind, content in blocks if kind == "h1"), os.path.splitext(os.path.basename(source_path))[0])
+    if blocks and blocks[0][0] == "h1":
+        blocks = blocks[1:]
+    output = build_html(title, metadata.get("status", "draft"), render_blocks(blocks), os.path.basename(source_path))
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    output_path = os.path.join(OUTPUT_DIR, os.path.splitext(os.path.basename(source_path))[0] + ".html")
+    with open(output_path, "w", encoding="utf-8", newline="\n") as file:
+        file.write(output)
+    print(f"HTMLを生成しました: {output_path}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="患者説明文書MarkdownをHTMLに変換します。"
-    )
-    parser.add_argument(
-        "targets",
-        nargs="+",
-        help="変換するMarkdownファイル名。必ず1つ以上指定してください。",
-    )
+    parser = argparse.ArgumentParser(description="患者説明文書の試作・閲覧用HTMLを生成します。")
+    parser.add_argument("markdown_file", help="src配下のMarkdownファイル")
     args = parser.parse_args()
-    raise SystemExit(convert_all_markdowns(args.targets))
+    if not os.path.isfile(args.markdown_file):
+        parser.error(f"ファイルが見つかりません: {args.markdown_file}")
+    generate(args.markdown_file)

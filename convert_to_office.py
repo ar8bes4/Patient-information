@@ -9,6 +9,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 import win32com.client
 
 OFFICECLI_PATH = r"C:\Users\yert1\Documents\agy\00_System\bin\officecli.exe"
+IMAGE_PATTERN = re.compile(r'^!\[([^\]]*)\]\(([^)]+)\)$')
 
 
 def run_officecli_checks(document_path):
@@ -51,8 +52,15 @@ def parse_markdown(filepath):
         if not stripped:
             continue
             
-        # テンプレートタグ（{{slide_summary: ...}} や {{visual: ...}} など）を除外
+        # テンプレートタグは生成対象から除外
         if stripped.startswith('{{') and stripped.endswith('}}'):
+            continue
+
+        image_match = IMAGE_PATTERN.match(stripped)
+        if image_match:
+            alt_text, relative_path = image_match.groups()
+            image_path = os.path.normpath(os.path.join(os.path.dirname(filepath), relative_path))
+            parsed.append(('image', (alt_text, image_path)))
             continue
             
         # 見出し判定
@@ -211,6 +219,19 @@ def build_docx(parsed_data, output_path):
             p = add_paragraph_with_inline_formatting(doc, content, style='Normal')
             p.paragraph_format.left_indent = Inches(0.5)
             p.paragraph_format.space_after = Pt(6)
+        elif item_type == 'image':
+            alt_text, image_path = content
+            if not os.path.isfile(image_path):
+                p = add_paragraph_with_inline_formatting(doc, f"【図版未検出】{alt_text}: {image_path}", style='Normal')
+                p.paragraph_format.space_after = Pt(6)
+                continue
+            p = doc.add_paragraph()
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.add_run().add_picture(image_path, width=Inches(5.8))
+            p.paragraph_format.space_after = Pt(3)
+            if alt_text:
+                caption = add_paragraph_with_inline_formatting(doc, alt_text, style='Normal', alignment=WD_ALIGN_PARAGRAPH.CENTER)
+                caption.paragraph_format.space_after = Pt(8)
         else:
             p = add_paragraph_with_inline_formatting(doc, content, style='Normal')
             p.paragraph_format.space_after = Pt(6)

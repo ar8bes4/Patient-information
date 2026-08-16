@@ -12,6 +12,7 @@ from pptx.enum.text import PP_ALIGN
 base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
 pptx_dir = os.path.join(base_dir, "pptx")
 OFFICECLI_PATH = r"C:\Users\yert1\Documents\agy\00_System\bin\officecli.exe"
+IMAGE_PATTERN = re.compile(r'^!\[([^\]]*)\]\(([^)]+)\)$')
 
 if not os.path.exists(pptx_dir):
     os.makedirs(pptx_dir)
@@ -37,7 +38,7 @@ def run_officecli_checks(document_path):
             detail = result.stderr.strip() or result.stdout.strip() or "詳細情報なし"
             print(f"WARNING: OfficeCLI {label}に失敗しました: {detail}")
 
-def parse_markdown_to_sections(md_text):
+def parse_markdown_to_sections(md_text, source_dir):
     lines = md_text.splitlines()
     
     # 1. フロントマターの除去
@@ -65,7 +66,8 @@ def parse_markdown_to_sections(md_text):
     current_section = {
         "title": "表紙",
         "slide_summary": "",
-        "body_lines": []
+        "body_lines": [],
+        "images": []
     }
     
     is_first = True
@@ -87,12 +89,19 @@ def parse_markdown_to_sections(md_text):
             current_section = {
                 "title": h2_text,
                 "slide_summary": "",
-                "body_lines": []
+                "body_lines": [],
+                "images": []
             }
             continue
             
-        if re.match(r"^\{\{visual:\s*[a-zA-Z0-9_-]+\s*\}\}$", cleaned):
-            # 旧原稿との互換性のため図版指定は読み飛ばす。
+        if cleaned.startswith("{{") and cleaned.endswith("}}"):
+            continue
+
+        image_match = IMAGE_PATTERN.match(cleaned)
+        if image_match:
+            alt_text, relative_path = image_match.groups()
+            image_path = os.path.normpath(os.path.join(source_dir, relative_path))
+            current_section["images"].append((alt_text, image_path))
             continue
             
         # スライド要約タグ
@@ -166,8 +175,9 @@ def create_slide_deck(title, sections, output_path):
         p.font.bold = True
         p.font.color.rgb = teal_dark
         
-        # 本文・スライド要約を全幅で表示する。
-        tx_content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.8), Inches(11.7), Inches(4.8))
+        has_image = bool(sec["images"] and os.path.isfile(sec["images"][0][1]))
+        content_width = 5.6 if has_image else 11.7
+        tx_content_box = slide.shapes.add_textbox(Inches(0.8), Inches(1.8), Inches(content_width), Inches(4.8))
         tf_content = tx_content_box.text_frame
         tf_content.word_wrap = True
         
@@ -197,6 +207,18 @@ def create_slide_deck(title, sections, output_path):
                 p_body.font.size = Pt(18)
                 p_body.font.color.rgb = ink_dark
                 p_body.space_after = Pt(10)
+
+        if has_image:
+            alt_text, image_path = sec["images"][0]
+            slide.shapes.add_picture(image_path, Inches(7.0), Inches(1.8), width=Inches(5.1))
+            if alt_text:
+                caption_box = slide.shapes.add_textbox(Inches(7.0), Inches(6.5), Inches(5.1), Inches(0.4))
+                caption = caption_box.text_frame.paragraphs[0]
+                caption.text = alt_text
+                caption.font.name = "Yu Gothic"
+                caption.font.size = Pt(12)
+                caption.font.color.rgb = ink_dark
+                caption.alignment = PP_ALIGN.CENTER
                 
         # スピーカーノートに元の詳細テキストを流し込む
         notes_slide = slide.notes_slide
@@ -231,5 +253,5 @@ if __name__ == "__main__":
     with open(md_file, "r", encoding="utf-8") as f:
         md_text = f.read()
         
-    title, sections = parse_markdown_to_sections(md_text)
+    title, sections = parse_markdown_to_sections(md_text, os.path.dirname(os.path.abspath(md_file)))
     create_slide_deck(title, sections, pptx_path)
