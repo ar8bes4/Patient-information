@@ -38,6 +38,9 @@ def parse_blocks(body, source_dir):
         index += 1
         if not text or (text.startswith("{{") and text.endswith("}}")):
             continue
+        if text in {"---", "***", "___"}:
+            blocks.append(("hr", ""))
+            continue
         image_match = IMAGE_PATTERN.match(text)
         if image_match:
             alt, relative_path = image_match.groups()
@@ -68,6 +71,12 @@ def parse_blocks(body, source_dir):
                 items.append(lines[index].strip()[2:])
                 index += 1
             blocks.append(("list", items))
+        elif re.match(r"^\d+\.\s+", text):
+            items = [re.sub(r"^\d+\.\s+", "", text)]
+            while index < len(lines) and re.match(r"^\d+\.\s+", lines[index].strip()):
+                items.append(re.sub(r"^\d+\.\s+", "", lines[index].strip()))
+                index += 1
+            blocks.append(("ordered_list", items))
         else:
             blocks.append(("p", raw.strip()))
     return blocks
@@ -81,6 +90,10 @@ def render_blocks(blocks):
             rendered.append(f"<{tag}>{inline(content)}</{tag}>")
         elif kind == "list":
             rendered.append("<ul>" + "".join(f"<li>{inline(item)}</li>" for item in content) + "</ul>")
+        elif kind == "ordered_list":
+            rendered.append("<ol>" + "".join(f"<li>{inline(item)}</li>" for item in content) + "</ol>")
+        elif kind == "hr":
+            rendered.append("<hr>")
         elif kind == "callout":
             marker, message = content
             level = "important" if marker in {"IMPORTANT", "WARNING", "CAUTION"} else "note"
@@ -111,7 +124,7 @@ def build_html(title, status, body_html, source_name):
     * {{ box-sizing:border-box; }} body {{ margin:0; color:var(--ink); background:#eef3f7; font-family:"Yu Gothic","YuGothic","Meiryo",sans-serif; font-size:17px; line-height:1.8; }}
     .bar {{ padding:12px 20px; color:#fff; background:var(--teal-dark); font-size:14px; }} .document {{ width:min(100%,960px); margin:28px auto 64px; background:var(--paper); box-shadow:0 14px 35px rgba(31,41,51,.10); }}
     header {{ padding:44px 52px 32px; border-bottom:1px solid var(--line); background:linear-gradient(135deg,#fff 0%,#edf8f6 100%); }} .eyebrow {{ margin:0 0 10px; color:var(--teal-dark); font-size:14px; font-weight:700; letter-spacing:.05em; }} h1 {{ margin:0; color:var(--ink); font-size:clamp(28px,4vw,42px); line-height:1.35; }}
-    main {{ padding:12px 52px 42px; }} h2 {{ margin:42px 0 16px; padding-left:14px; border-left:6px solid var(--teal); color:var(--teal-dark); font-size:25px; line-height:1.4; }} h3 {{ margin:28px 0 10px; color:var(--teal-dark); font-size:19px; }} p {{ margin:0 0 16px; }} ul {{ margin:0 0 20px; padding-left:1.45em; }} li {{ margin:6px 0; }} strong {{ color:#153e3b; }} blockquote {{ margin:20px 0; padding:12px 18px; border-left:4px solid #93c5bd; background:var(--panel); color:var(--muted); }}
+    main {{ padding:12px 52px 42px; }} h2 {{ margin:42px 0 16px; padding-left:14px; border-left:6px solid var(--teal); color:var(--teal-dark); font-size:25px; line-height:1.4; }} h3 {{ margin:28px 0 10px; color:var(--teal-dark); font-size:19px; }} p {{ margin:0 0 16px; }} ul, ol {{ margin:0 0 20px; padding-left:1.45em; }} li {{ margin:6px 0; }} hr {{ margin:28px 0; border:0; border-top:1px solid var(--line); }} strong {{ color:#153e3b; }} blockquote {{ margin:20px 0; padding:12px 18px; border-left:4px solid #93c5bd; background:var(--panel); color:var(--muted); }}
     .callout {{ margin:24px 0; padding:16px 18px; border-left:6px solid var(--teal); background:var(--panel); }} .callout.important {{ border-color:var(--urgent); background:var(--urgent-bg); }} .callout p {{ margin:0; }} .callout-label {{ margin-bottom:5px !important; color:var(--teal-dark); font-size:13px; font-weight:700; letter-spacing:.06em; }} .important .callout-label {{ color:var(--urgent); }} figure {{ margin:28px auto; text-align:center; }} figure img {{ max-width:100%; max-height:520px; border:1px solid var(--line); border-radius:10px; background:#fff; }} figcaption {{ margin-top:8px; color:var(--muted); font-size:14px; }} footer {{ padding:18px 52px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }}
     @media print {{ body {{ background:#fff; }} .bar {{ display:none; }} .document {{ width:100%; margin:0; box-shadow:none; }} }} @media (max-width:640px) {{ .document {{ margin:0; }} header,main,footer {{ padding-left:22px; padding-right:22px; }} body {{ font-size:16px; }} }}
   </style>
