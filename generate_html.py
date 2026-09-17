@@ -77,6 +77,19 @@ def parse_blocks(body, source_dir):
                 items.append(re.sub(r"^\d+\.\s+", "", lines[index].strip()))
                 index += 1
             blocks.append(("ordered_list", items))
+        elif text.startswith("|") and text.endswith("|"):
+            table_lines = [text]
+            while index < len(lines) and lines[index].strip().startswith("|") and lines[index].strip().endswith("|"):
+                table_lines.append(lines[index].strip())
+                index += 1
+            rows = []
+            for t_line in table_lines:
+                cells = [c.strip() for c in t_line.split("|")[1:-1]]
+                if all(c.replace("-", "").replace(":", "").strip() == "" for c in cells if c):
+                    continue
+                rows.append(cells)
+            if rows:
+                blocks.append(("table", rows))
         else:
             blocks.append(("p", raw.strip()))
     return blocks
@@ -92,6 +105,25 @@ def render_blocks(blocks):
             rendered.append("<ul>" + "".join(f"<li>{inline(item)}</li>" for item in content) + "</ul>")
         elif kind == "ordered_list":
             rendered.append("<ol>" + "".join(f"<li>{inline(item)}</li>" for item in content) + "</ol>")
+        elif kind == "table":
+            rows = content
+            if not rows:
+                continue
+            table_html = ['<table style="width:100%; border-collapse:collapse; margin:24px 0; font-size:15px; border-top:2px solid var(--teal); border-bottom:2px solid var(--teal); background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.02);">']
+            table_html.append('<thead><tr style="background:var(--panel); border-bottom:1px solid var(--line);">')
+            for cell in rows[0]:
+                table_html.append(f'<th style="padding:12px 14px; text-align:left; color:var(--teal-dark); font-weight:700;">{inline(cell)}</th>')
+            table_html.append('</tr></thead><tbody>')
+            for r_idx, row in enumerate(rows[1:]):
+                bg = 'style="background:#fcfdfd; border-bottom:1px solid var(--line);"' if r_idx % 2 == 1 else 'style="border-bottom:1px solid var(--line);"'
+                table_html.append(f'<tr {bg}>')
+                for c_idx, cell in enumerate(row):
+                    cell_formatted = inline(cell).replace('&lt;br&gt;', '<br>')
+                    align = 'center' if c_idx in (0, 2) else 'left'
+                    table_html.append(f'<td style="padding:10px 14px; vertical-align:top; text-align:{align};">{cell_formatted}</td>')
+                table_html.append('</tr>')
+            table_html.append('</tbody></table>')
+            rendered.append("".join(table_html))
         elif kind == "hr":
             rendered.append("<hr>")
         elif kind == "callout":

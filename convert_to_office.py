@@ -46,6 +46,40 @@ def set_eastasia_font(run, font_name="游ゴシック"):
     rFonts.set(qn('w:hAnsi'), font_name)
 
 
+def set_cell_background(cell, fill_hex):
+    tcPr = cell._tc.get_or_add_tcPr()
+    shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
+    tcPr.append(shd)
+
+
+def set_cell_margins(cell, top=100, bottom=100, left=140, right=140):
+    tcPr = cell._tc.get_or_add_tcPr()
+    tcMar = parse_xml(
+        f'<w:tcMar {nsdecls("w")}>'
+        f'<w:top w:w="{top}" w:type="dxa"/>'
+        f'<w:bottom w:w="{bottom}" w:type="dxa"/>'
+        f'<w:left w:w="{left}" w:type="dxa"/>'
+        f'<w:right w:w="{right}" w:type="dxa"/>'
+        f'</w:tcMar>'
+    )
+    tcPr.append(tcMar)
+
+
+def set_table_borders(table, color="CBD5E1"):
+    tblPr = table._tbl.tblPr
+    borders = parse_xml(
+        f'<w:tblBorders {nsdecls("w")}>'
+        f'<w:top w:val="single" w:sz="6" w:space="0" w:color="{color}"/>'
+        f'<w:bottom w:val="single" w:sz="8" w:space="0" w:color="{color}"/>'
+        f'<w:insideH w:val="single" w:sz="4" w:space="0" w:color="{color}"/>'
+        f'<w:insideV w:val="none"/>'
+        f'<w:left w:val="none"/>'
+        f'<w:right w:val="none"/>'
+        f'</w:tblBorders>'
+    )
+    tblPr.append(borders)
+
+
 def parse_markdown(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         content = f.read()
@@ -146,6 +180,27 @@ def parse_markdown(filepath):
                 parsed.append(('num_list', (level, num_prefix, num_text)))
             else:
                 parsed.append(('paragraph', stripped))
+        # テーブル判定 (| で始まり | で終わる行)
+        elif stripped.startswith('|') and stripped.endswith('|'):
+            table_lines = [stripped]
+            while idx < len(lines):
+                next_raw = lines[idx]
+                next_stripped = next_raw.strip()
+                if next_stripped.startswith('|') and next_stripped.endswith('|'):
+                    table_lines.append(next_stripped)
+                    idx += 1
+                else:
+                    break
+            
+            rows = []
+            for t_line in table_lines:
+                cells = [c.strip() for c in t_line.split('|')[1:-1]]
+                # 区切り行 (--- や :---:) を除外
+                if all(c.replace('-', '').replace(':', '').strip() == '' for c in cells if c):
+                    continue
+                rows.append(cells)
+            if rows:
+                parsed.append(('table', rows))
         # 通常の段落
         else:
             parsed.append(('paragraph', stripped))
@@ -350,6 +405,75 @@ def build_docx(parsed_data, output_path):
                 caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 caption.paragraph_format.space_after = Pt(8)
                 add_formatted_runs(caption, alt_text, default_color=MUTED_COLOR)
+        elif item_type == 'table':
+            rows_data = content
+            if not rows_data:
+                continue
+            col_count = max(len(r) for r in rows_data)
+            table = doc.add_table(rows=len(rows_data), cols=col_count)
+            table.alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
+            set_table_borders(table, color="CBD5E1")
+            
+            for row_idx, row_cells in enumerate(rows_data):
+                is_header = (row_idx == 0)
+                row_elem = table.rows[row_idx]
+                
+                if is_header:
+                    trPr = row_elem._tr.get_or_add_trPr()
+                    trPr.append(parse_xml(f'<w:tblHeader {nsdecls("w")}/>'))
+                
+                for col_idx in range(col_count):
+                    cell = row_elem.cells[col_idx]
+                    cell_text = row_cells[col_idx] if col_idx < len(row_cells) else ""
+                    
+                    set_cell_margins(cell, top=100, bottom=100, left=140, right=140)
+                    
+                    if is_header:
+                        set_cell_background(cell, "0F766E")
+                    elif row_idx % 2 == 1:
+                        set_cell_background(cell, "F8FAFC")
+                    else:
+                        set_cell_background(cell, "FFFFFF")
+                    
+                    p = cell.paragraphs[0]
+                    p.paragraph_format.space_before = Pt(0)
+                    p.paragraph_format.space_after = Pt(0)
+                    p.paragraph_format.line_spacing = 1.15
+                    
+                    # 危険度列（col_idx==2）は中央揃え、時期列（col_idx==0）も中央揃え
+                    if col_idx in (0, 2):
+                        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    
+                    lines = cell_text.replace('<br>', '\n').split('\n')
+                    for l_idx, line in enumerate(lines):
+                        if l_idx > 0:
+                            p = cell.add_paragraph()
+                            p.paragraph_format.space_before = Pt(0)
+                            p.paragraph_format.space_after = Pt(0)
+                            p.paragraph_format.line_spacing = 1.15
+                            if col_idx in (0, 2):
+                                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        
+                        if is_header:
+                            add_formatted_runs(p, line, default_color=RGBColor(0xFF, 0xFF, 0xFF))
+                            for r in p.runs:
+                                r.font.size = Pt(9.5)
+                                r.bold = True
+                        else:
+                            add_formatted_runs(p, line, default_color=TEXT_COLOR)
+                            for r in p.runs:
+                                r.font.size = Pt(9.0)
+            
+            # 列幅の調整
+            if col_count == 4:
+                col_widths = [Inches(1.1), Inches(1.5), Inches(0.9), Inches(2.77)]
+                for row in table.rows:
+                    for c_idx, w in enumerate(col_widths):
+                        row.cells[c_idx].width = w
+            
+            p_after = doc.add_paragraph()
+            p_after.paragraph_format.space_before = Pt(0)
+            p_after.paragraph_format.space_after = Pt(6)
         else:
             p = doc.add_paragraph()
             p.paragraph_format.space_before = Pt(0)
