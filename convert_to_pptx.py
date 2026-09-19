@@ -8,14 +8,15 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
+from pathlib import Path
 
-base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
-pptx_dir = os.path.join(base_dir, "pptx")
-OFFICECLI_PATH = r"C:\Users\yert1\Documents\agy\00_System\bin\officecli.exe"
+BASE_DIR = Path(__file__).resolve().parent
+PPTX_DIR = BASE_DIR / "pptx"
+OFFICECLI_PATH = BASE_DIR.parents[1] / "00_System" / "bin" / "officecli.exe"
 IMAGE_PATTERN = re.compile(r'^!\[([^\]]*)\]\(([^)]+)\)$')
 
-if not os.path.exists(pptx_dir):
-    os.makedirs(pptx_dir)
+PPTX_DIR.mkdir(parents=True, exist_ok=True)
+pptx_dir = str(PPTX_DIR)
 
 
 def run_officecli_checks(document_path):

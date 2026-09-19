@@ -8,9 +8,24 @@ from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import parse_xml, OxmlElement
 from docx.oxml.ns import nsdecls, qn
-import win32com.client
+from pathlib import Path
+import platform
+import shutil
 
-OFFICECLI_PATH = r"C:\Users\yert1\Documents\agy\00_System\bin\officecli.exe"
+BASE_DIR = Path(__file__).resolve().parent
+DOCX_DIR = BASE_DIR / "docx"
+PDF_DIR = BASE_DIR / "PDF"
+OFFICECLI_PATH = BASE_DIR.parents[1] / "00_System" / "bin" / "officecli.exe"
+
+IS_WINDOWS = platform.system() == "Windows"
+HAS_WIN32COM = False
+if IS_WINDOWS:
+    try:
+        import win32com.client
+        HAS_WIN32COM = True
+    except ImportError:
+        HAS_WIN32COM = False
+
 IMAGE_PATTERN = re.compile(r'^!\[([^\]]*)\]\(([^)]+)\)$')
 
 
@@ -486,21 +501,47 @@ def build_docx(parsed_data, output_path):
 
 
 def convert_docx_to_pdf(docx_path, pdf_path):
-    word = win32com.client.DispatchEx("Word.Application")
-    word.Visible = False
-    try:
-        abs_docx = os.path.abspath(docx_path)
-        abs_pdf = os.path.abspath(pdf_path)
-        
-        doc = word.Documents.Open(abs_docx)
-        doc.SaveAs(abs_pdf, FileFormat=17)
-        doc.Close()
-        print(f"Successfully converted {docx_path} to {pdf_path}")
-    except Exception as e:
-        print(f"Error during PDF conversion: {e}")
-        raise e
-    finally:
-        word.Quit()
+    abs_docx = str(Path(docx_path).resolve())
+    abs_pdf = str(Path(pdf_path).resolve())
+    
+    # 1. Windows環境かつWord COMが利用可能な場合
+    if IS_WINDOWS and HAS_WIN32COM:
+        try:
+            word = win32com.client.DispatchEx("Word.Application")
+            word.Visible = False
+            try:
+                doc = word.Documents.Open(abs_docx)
+                doc.SaveAs(abs_pdf, FileFormat=17)
+                doc.Close()
+                print(f"Successfully converted {docx_path} to {pdf_path} (via Word COM)")
+                return
+            finally:
+                word.Quit()
+        except Exception as e:
+            print(f"WARNING: Word COM conversion failed: {e}. Trying LibreOffice fallback...")
+
+    # 2. LibreOffice (soffice) によるフォールバック (macOS / Linux / Windows)
+    soffice_cmd = shutil.which("soffice")
+    if not soffice_cmd and platform.system() == "Darwin":
+        mac_libreoffice = Path("/Applications/LibreOffice.app/Contents/MacOS/soffice")
+        if mac_libreoffice.exists():
+            soffice_cmd = str(mac_libreoffice)
+
+    if soffice_cmd:
+        try:
+            out_dir = str(Path(pdf_path).parent.resolve())
+            cmd = [soffice_cmd, "--headless", "--convert-to", "pdf", abs_docx, "--outdir", out_dir]
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode == 0:
+                print(f"Successfully converted {docx_path} to {pdf_path} (via LibreOffice)")
+                return
+            else:
+                print(f"WARNING: LibreOffice conversion failed: {res.stderr}")
+        except Exception as e:
+            print(f"WARNING: LibreOffice execution failed: {e}")
+
+    # 3. 変換エンジンが利用できない場合
+    print(f"INFO: PDF変換エンジン（Word COMまたはLibreOffice）が利用できないため、PDF変換をスキップしました（DOCX生成は完了）。")
 
 
 if __name__ == "__main__":
@@ -508,26 +549,20 @@ if __name__ == "__main__":
         print("Usage: python convert_to_office.py <markdown_file>")
         sys.exit(1)
         
-    md_file = sys.argv[1]
-    if not os.path.exists(md_file):
+    md_file = Path(sys.argv[1])
+    if not md_file.exists():
         print(f"Error: {md_file} does not exist.")
         sys.exit(1)
         
-    base_name = os.path.splitext(os.path.basename(md_file))[0]
+    base_name = md_file.stem
     
-    base_dir = r"C:\Users\yert1\Documents\agy\10_Medical\Patient-information"
-    docx_dir = os.path.join(base_dir, "docx")
-    pdf_dir = os.path.join(base_dir, "PDF")
-    
-    if not os.path.exists(docx_dir):
-        os.makedirs(docx_dir)
-    if not os.path.exists(pdf_dir):
-        os.makedirs(pdf_dir)
+    DOCX_DIR.mkdir(parents=True, exist_ok=True)
+    PDF_DIR.mkdir(parents=True, exist_ok=True)
         
-    docx_path = os.path.join(docx_dir, f"{base_name}.docx")
-    pdf_path = os.path.join(pdf_dir, f"{base_name}.pdf")
+    docx_path = DOCX_DIR / f"{base_name}.docx"
+    pdf_path = PDF_DIR / f"{base_name}.pdf"
     
-    parsed = parse_markdown(md_file)
-    build_docx(parsed, docx_path)
-    run_officecli_checks(docx_path)
-    convert_docx_to_pdf(docx_path, pdf_path)
+    parsed = parse_markdown(str(md_file))
+    build_docx(parsed, str(docx_path))
+    run_officecli_checks(str(docx_path))
+    convert_docx_to_pdf(str(docx_path), str(pdf_path))
