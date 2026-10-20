@@ -165,7 +165,7 @@ def parse_markdown(filepath):
                 else:
                     break
             
-            parsed.append(('callout', (tag, " ".join(callout_lines))))
+            parsed.append(('callout', (tag, callout_lines)))
         # 通常の引用
         elif stripped.startswith('> '):
             quote_lines = [stripped[2:]]
@@ -326,7 +326,7 @@ def build_docx(parsed_data, output_path):
             add_formatted_runs(p, text, default_color=TEXT_COLOR)
             
         elif item_type == 'callout':
-            tag, text = content
+            tag, lines_or_text = content
             table = doc.add_table(rows=1, cols=1)
             table.autofit = False
             table.columns[0].width = Inches(6.5)
@@ -367,17 +367,42 @@ def build_docx(parsed_data, output_path):
             )
             cell._tc.get_or_add_tcPr().append(mar_elm)
             
-            cp = cell.paragraphs[0]
-            cp.paragraph_format.space_before = Pt(2)
-            cp.paragraph_format.space_after = Pt(2)
-            cp.paragraph_format.line_spacing = 1.15
-            
-            run_tag = cp.add_run(f"{config['label']} ")
-            run_tag.bold = True
-            run_tag.font.color.rgb = config['tag_rgb']
-            set_eastasia_font(run_tag)
-            
-            add_formatted_runs(cp, text, default_color=TEXT_COLOR)
+            # 行リストに正規化
+            if isinstance(lines_or_text, str):
+                c_lines = [lines_or_text]
+            else:
+                c_lines = lines_or_text
+                
+            for line_idx, c_line in enumerate(c_lines):
+                if line_idx == 0:
+                    cp = cell.paragraphs[0]
+                    cp.paragraph_format.space_before = Pt(2)
+                    cp.paragraph_format.space_after = Pt(2)
+                    cp.paragraph_format.line_spacing = 1.15
+                    
+                    run_tag = cp.add_run(f"{config['label']} ")
+                    run_tag.bold = True
+                    run_tag.font.color.rgb = config['tag_rgb']
+                    set_eastasia_font(run_tag)
+                    
+                    clean_first = re.sub(r'^\s*[\*\-]\s+', '', c_line)
+                    add_formatted_runs(cp, clean_first, default_color=TEXT_COLOR)
+                else:
+                    cp = cell.add_paragraph()
+                    cp.paragraph_format.space_before = Pt(1)
+                    cp.paragraph_format.space_after = Pt(2)
+                    cp.paragraph_format.line_spacing = 1.15
+                    
+                    bullet_match = re.match(r'^\s*[\*\-]\s+(.*)', c_line)
+                    if bullet_match:
+                        cp.paragraph_format.left_indent = Inches(0.2)
+                        run_bullet = cp.add_run("• ")
+                        run_bullet.bold = True
+                        run_bullet.font.color.rgb = config['tag_rgb']
+                        set_eastasia_font(run_bullet)
+                        add_formatted_runs(cp, bullet_match.group(1), default_color=TEXT_COLOR)
+                    else:
+                        add_formatted_runs(cp, c_line, default_color=TEXT_COLOR)
             
             # テーブル下のスペース
             space_p = doc.add_paragraph()
