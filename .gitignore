@@ -27,6 +27,9 @@ Thumbs.db
 docx/
 pptx/
 PDF/
+*.docx
+*.pptx
+*.pdf
 *.inspect.ndjson
 
 # Images & Draft assets
