@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import argparse
 import os
 import sys
 import re
@@ -607,11 +608,13 @@ def convert_docx_to_pdf(docx_path, pdf_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python convert_to_office.py <markdown_file>")
-        sys.exit(1)
+    cli_parser = argparse.ArgumentParser(description="Markdown正本からWord(.docx)およびPDFを生成する組版スクリプト")
+    cli_parser.add_argument("markdown_file", type=Path, help="変換対象のMarkdown正本パス")
+    cli_parser.add_argument("--font-size", type=str, help="本文フォントサイズ (ptまたはlarge/14等。指定時はフロントマターより優先)")
+    cli_parser.add_argument("--large-font", action="store_true", help="高齢者向け大活字 (14pt) レイアウトを強制適用")
+    args = cli_parser.parse_args()
         
-    md_file = Path(sys.argv[1])
+    md_file = args.markdown_file
     if not md_file.exists():
         print(f"Error: {md_file} does not exist.")
         sys.exit(1)
@@ -625,6 +628,11 @@ if __name__ == "__main__":
     pdf_path = PDF_DIR / f"{base_name}.pdf"
     
     parsed, metadata = parse_markdown(str(md_file))
+    if args.large_font:
+        metadata["font_size"] = "14"
+    elif args.font_size:
+        metadata["font_size"] = args.font_size
+
     build_docx(parsed, str(docx_path), metadata=metadata)
     run_officecli_checks(str(docx_path))
     convert_docx_to_pdf(str(docx_path), str(pdf_path))
