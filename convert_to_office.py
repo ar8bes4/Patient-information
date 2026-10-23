@@ -255,18 +255,28 @@ def build_docx(parsed_data, output_path, metadata=None):
         
     font_size_val = str(metadata.get('font_size', '')).lower()
     target_audience = str(metadata.get('target_audience', '')).lower()
-    is_large = (
-        font_size_val in ('large', '12', '12pt', '12.0', '13', '13pt', '13.0') or
-        metadata.get('large_font', '').lower() == 'true' or
-        '高齢者' in target_audience or '大きな文字' in target_audience
-    )
-    base_size = Pt(12) if is_large else Pt(10.5)
+    
+    # フォントサイズの決定（高齢者・大きな文字指定時は大活字 14pt を標準適用）
+    if font_size_val in ('16', '16pt', '16.0', 'huge'):
+        base_size = Pt(16)
+        is_large = True
+    elif font_size_val in ('14', '14pt', '14.0', 'xlarge') or '高齢者' in target_audience or '大きな文字' in target_audience or font_size_val == 'large':
+        base_size = Pt(14)
+        is_large = True
+    elif font_size_val in ('12', '12pt', '12.0', 'medium_large'):
+        base_size = Pt(12)
+        is_large = True
+    else:
+        base_size = Pt(10.5)
+        is_large = False
 
     doc = docx.Document()
     
-    # 余白設定 (通常1インチ=25.4mm、large時はA4 1枚収容と視認性のため 17mm=0.67インチに最適化)
-    margin_val = Inches(0.67) if is_large else Inches(1)
+    # 用紙サイズを日本標準の A4 (210mm x 297mm) に設定
+    margin_val = Inches(0.53) if is_large else Inches(1)
     for section in doc.sections:
+        section.page_width = Inches(8.27)   # 210mm
+        section.page_height = Inches(11.69) # 297mm
         section.top_margin = margin_val
         section.bottom_margin = margin_val
         section.left_margin = margin_val
@@ -288,36 +298,36 @@ def build_docx(parsed_data, output_path, metadata=None):
         if item_type == 'h1':
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p.paragraph_format.space_before = Pt(4) if is_large else Pt(8)
-            p.paragraph_format.space_after = Pt(8) if is_large else Pt(14)
+            p.paragraph_format.space_before = Pt(2) if is_large else Pt(8)
+            p.paragraph_format.space_after = Pt(6) if is_large else Pt(14)
             p.paragraph_format.line_spacing = 1.15 if is_large else 1.2
             
             # 見出し1テキスト
             add_formatted_runs(p, content, default_color=PRIMARY_COLOR)
             for r in p.runs:
-                r.font.size = Pt(16.5) if is_large else Pt(18)
+                r.font.size = Pt(18)
                 r.bold = True
                 
         elif item_type == 'h2':
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(8) if is_large else Pt(14)
-            p.paragraph_format.space_after = Pt(3) if is_large else Pt(6)
+            p.paragraph_format.space_before = Pt(6) if is_large else Pt(14)
+            p.paragraph_format.space_after = Pt(2) if is_large else Pt(6)
             p.paragraph_format.keep_with_next = True
             
             add_formatted_runs(p, content, default_color=PRIMARY_COLOR)
             for r in p.runs:
-                r.font.size = Pt(13.5)
+                r.font.size = Pt(15.5) if is_large else Pt(13.5)
                 r.bold = True
                 
         elif item_type == 'h3':
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(6) if is_large else Pt(10)
+            p.paragraph_format.space_before = Pt(4) if is_large else Pt(10)
             p.paragraph_format.space_after = Pt(2) if is_large else Pt(4)
             p.paragraph_format.keep_with_next = True
             
             add_formatted_runs(p, content, default_color=DARK_TEAL)
             for r in p.runs:
-                r.font.size = Pt(12) if is_large else Pt(11.5)
+                r.font.size = Pt(14.5) if is_large else Pt(11.5)
                 r.bold = True
                 
         elif item_type == 'bullet':
@@ -351,7 +361,7 @@ def build_docx(parsed_data, output_path, metadata=None):
             tag, lines_or_text = content
             table = doc.add_table(rows=1, cols=1)
             table.autofit = False
-            table.columns[0].width = Inches(6.5)
+            table.columns[0].width = Inches(7.2) if is_large else Inches(6.5)
             cell = table.cell(0, 0)
             
             # タグに応じた色分け
@@ -380,12 +390,14 @@ def build_docx(parsed_data, output_path, metadata=None):
             cell._tc.get_or_add_tcPr().append(borders_elm)
             
             # セル内余白 (パディング)
+            pad_tb = "80" if is_large else "120"
+            pad_lr = "120" if is_large else "180"
             mar_elm = parse_xml(
                 f'<w:tcMar {nsdecls("w")}>'
-                f'<w:top w:w="120" w:type="dxa"/>'
-                f'<w:bottom w:w="120" w:type="dxa"/>'
-                f'<w:left w:w="180" w:type="dxa"/>'
-                f'<w:right w:w="180" w:type="dxa"/>'
+                f'<w:top w:w="{pad_tb}" w:type="dxa"/>'
+                f'<w:bottom w:w="{pad_tb}" w:type="dxa"/>'
+                f'<w:left w:w="{pad_lr}" w:type="dxa"/>'
+                f'<w:right w:w="{pad_lr}" w:type="dxa"/>'
                 f'</w:tcMar>'
             )
             cell._tc.get_or_add_tcPr().append(mar_elm)
