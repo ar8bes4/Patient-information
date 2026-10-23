@@ -99,11 +99,17 @@ def parse_markdown(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # フロントマターを除去
+    # フロントマターを除去および解析
     front_matter_pattern = re.compile(r'^---\s*\n(.*?)\n---\s*\n', re.DOTALL)
     match = front_matter_pattern.match(content)
+    metadata = {}
     if match:
         body = content[match.end():]
+        for line in match.group(1).splitlines():
+            line_str = line.strip()
+            if line_str and not line_str.startswith('#') and ':' in line_str:
+                k, v = line_str.split(':', 1)
+                metadata[k.strip()] = v.strip().strip('"\'')
     else:
         body = content
         
@@ -220,10 +226,10 @@ def parse_markdown(filepath):
         else:
             parsed.append(('paragraph', stripped))
             
-    return parsed
+    return parsed, metadata
 
 
-def add_formatted_runs(p, text, default_color=None, font_name="游ゴシック"):
+def add_formatted_runs(p, text, default_color=None, font_name="游ゴシック", font_size=None):
     parts = re.split(r'(\*\*.*?\*\*)', text)
     for part in parts:
         if not part:
@@ -237,25 +243,40 @@ def add_formatted_runs(p, text, default_color=None, font_name="游ゴシック")
             
         if default_color:
             run.font.color.rgb = default_color
+        if font_size:
+            run.font.size = font_size
         set_eastasia_font(run, font_name)
     return p
 
 
-def build_docx(parsed_data, output_path):
+def build_docx(parsed_data, output_path, metadata=None):
+    if metadata is None:
+        metadata = {}
+        
+    font_size_val = str(metadata.get('font_size', '')).lower()
+    target_audience = str(metadata.get('target_audience', '')).lower()
+    is_large = (
+        font_size_val in ('large', '12', '12pt', '12.0', '13', '13pt', '13.0') or
+        metadata.get('large_font', '').lower() == 'true' or
+        '高齢者' in target_audience or '大きな文字' in target_audience
+    )
+    base_size = Pt(12) if is_large else Pt(10.5)
+
     doc = docx.Document()
     
-    # 余白設定 (上下左右 25.4mm = 1インチ)
+    # 余白設定 (通常1インチ=25.4mm、large時はA4 1枚収容と視認性のため 17mm=0.67インチに最適化)
+    margin_val = Inches(0.67) if is_large else Inches(1)
     for section in doc.sections:
-        section.top_margin = Inches(1)
-        section.bottom_margin = Inches(1)
-        section.left_margin = Inches(1)
-        section.right_margin = Inches(1)
+        section.top_margin = margin_val
+        section.bottom_margin = margin_val
+        section.left_margin = margin_val
+        section.right_margin = margin_val
         
     # スタイルのカスタム
     style_normal = doc.styles['Normal']
     font_normal = style_normal.font
     font_normal.name = 'Yu Gothic'
-    font_normal.size = Pt(10.5)
+    font_normal.size = base_size
     font_normal.color.rgb = RGBColor(0x1F, 0x29, 0x33) # 濃いグレー
     
     PRIMARY_COLOR = RGBColor(0x0F, 0x76, 0x6E)     # 濃いティールグリーン
@@ -267,20 +288,20 @@ def build_docx(parsed_data, output_path):
         if item_type == 'h1':
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p.paragraph_format.space_before = Pt(8)
-            p.paragraph_format.space_after = Pt(14)
-            p.paragraph_format.line_spacing = 1.2
+            p.paragraph_format.space_before = Pt(4) if is_large else Pt(8)
+            p.paragraph_format.space_after = Pt(8) if is_large else Pt(14)
+            p.paragraph_format.line_spacing = 1.15 if is_large else 1.2
             
             # 見出し1テキスト
             add_formatted_runs(p, content, default_color=PRIMARY_COLOR)
             for r in p.runs:
-                r.font.size = Pt(18)
+                r.font.size = Pt(16.5) if is_large else Pt(18)
                 r.bold = True
                 
         elif item_type == 'h2':
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(14)
-            p.paragraph_format.space_after = Pt(6)
+            p.paragraph_format.space_before = Pt(8) if is_large else Pt(14)
+            p.paragraph_format.space_after = Pt(3) if is_large else Pt(6)
             p.paragraph_format.keep_with_next = True
             
             add_formatted_runs(p, content, default_color=PRIMARY_COLOR)
@@ -290,40 +311,41 @@ def build_docx(parsed_data, output_path):
                 
         elif item_type == 'h3':
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(10)
-            p.paragraph_format.space_after = Pt(4)
+            p.paragraph_format.space_before = Pt(6) if is_large else Pt(10)
+            p.paragraph_format.space_after = Pt(2) if is_large else Pt(4)
             p.paragraph_format.keep_with_next = True
             
             add_formatted_runs(p, content, default_color=DARK_TEAL)
             for r in p.runs:
-                r.font.size = Pt(11.5)
+                r.font.size = Pt(12) if is_large else Pt(11.5)
                 r.bold = True
                 
         elif item_type == 'bullet':
             level, text = content
             p = doc.add_paragraph(style='List Bullet')
-            p.paragraph_format.left_indent = Inches(0.25 * (level + 1))
+            p.paragraph_format.left_indent = Inches(0.2 * (level + 1))
             p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(3)
+            p.paragraph_format.space_after = Pt(2.5) if is_large else Pt(3)
             p.paragraph_format.line_spacing = 1.15
             
-            add_formatted_runs(p, text, default_color=TEXT_COLOR)
+            add_formatted_runs(p, text, default_color=TEXT_COLOR, font_size=base_size)
             
         elif item_type == 'num_list':
             level, num_prefix, text = content
             p = doc.add_paragraph()
-            p.paragraph_format.left_indent = Inches(0.25 * (level + 1))
-            p.paragraph_format.space_before = Pt(1)
-            p.paragraph_format.space_after = Pt(3)
+            p.paragraph_format.left_indent = Inches(0.2 * (level + 1))
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(2.5) if is_large else Pt(3)
             p.paragraph_format.line_spacing = 1.15
             
             # 番号プレフィックスを太字で追加
             run_num = p.add_run(f"{num_prefix}. ")
             run_num.bold = True
             run_num.font.color.rgb = PRIMARY_COLOR
+            run_num.font.size = base_size
             set_eastasia_font(run_num)
             
-            add_formatted_runs(p, text, default_color=TEXT_COLOR)
+            add_formatted_runs(p, text, default_color=TEXT_COLOR, font_size=base_size)
             
         elif item_type == 'callout':
             tag, lines_or_text = content
@@ -335,6 +357,7 @@ def build_docx(parsed_data, output_path):
             # タグに応じた色分け
             tag_configs = {
                 'IMPORTANT': {'fill': "FEF2F2", 'border': "DC2626", 'tag_rgb': RGBColor(0xDC, 0x26, 0x26), 'label': "【重要】"},
+                'CAUTION':   {'fill': "FEF2F2", 'border': "DC2626", 'tag_rgb': RGBColor(0xDC, 0x26, 0x26), 'label': "【緊急・警告】"},
                 'WARNING':   {'fill': "FFFBEB", 'border': "D97706", 'tag_rgb': RGBColor(0xD9, 0x77, 0x06), 'label': "【注意】"},
                 'TIP':       {'fill': "F0FDF4", 'border': "16A34A", 'tag_rgb': RGBColor(0x16, 0xA3, 0x4A), 'label': "【ポイント】"},
                 'NOTE':      {'fill': "F0FDFA", 'border': "0F766E", 'tag_rgb': RGBColor(0x0F, 0x76, 0x6E), 'label': "【まとめ】"},
@@ -383,10 +406,11 @@ def build_docx(parsed_data, output_path):
                     run_tag = cp.add_run(f"{config['label']} ")
                     run_tag.bold = True
                     run_tag.font.color.rgb = config['tag_rgb']
+                    run_tag.font.size = base_size
                     set_eastasia_font(run_tag)
                     
-                    clean_first = re.sub(r'^\s*[\*\-]\s+', '', c_line)
-                    add_formatted_runs(cp, clean_first, default_color=TEXT_COLOR)
+                    clean_first = re.sub(r'^(?:#{1,6}\s+|[\*\-]\s+)', '', c_line).strip()
+                    add_formatted_runs(cp, clean_first, default_color=TEXT_COLOR, font_size=base_size)
                 else:
                     cp = cell.add_paragraph()
                     cp.paragraph_format.space_before = Pt(1)
@@ -399,24 +423,25 @@ def build_docx(parsed_data, output_path):
                         run_bullet = cp.add_run("• ")
                         run_bullet.bold = True
                         run_bullet.font.color.rgb = config['tag_rgb']
+                        run_bullet.font.size = base_size
                         set_eastasia_font(run_bullet)
-                        add_formatted_runs(cp, bullet_match.group(1), default_color=TEXT_COLOR)
+                        add_formatted_runs(cp, bullet_match.group(1), default_color=TEXT_COLOR, font_size=base_size)
                     else:
-                        add_formatted_runs(cp, c_line, default_color=TEXT_COLOR)
+                        add_formatted_runs(cp, c_line, default_color=TEXT_COLOR, font_size=base_size)
             
             # テーブル下のスペース
             space_p = doc.add_paragraph()
             space_p.paragraph_format.space_before = Pt(0)
-            space_p.paragraph_format.space_after = Pt(6)
+            space_p.paragraph_format.space_after = Pt(4) if is_large else Pt(6)
             
         elif item_type == 'quote':
             p = doc.add_paragraph()
             p.paragraph_format.left_indent = Inches(0.4)
             p.paragraph_format.space_before = Pt(2)
-            p.paragraph_format.space_after = Pt(6)
+            p.paragraph_format.space_after = Pt(4) if is_large else Pt(6)
             p.paragraph_format.line_spacing = 1.15
             
-            add_formatted_runs(p, content, default_color=MUTED_COLOR)
+            add_formatted_runs(p, content, default_color=MUTED_COLOR, font_size=base_size)
             
         elif item_type == 'hr':
             p = doc.add_paragraph()
@@ -517,9 +542,9 @@ def build_docx(parsed_data, output_path):
         else:
             p = doc.add_paragraph()
             p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(5)
-            p.paragraph_format.line_spacing = 1.2
-            add_formatted_runs(p, content, default_color=TEXT_COLOR)
+            p.paragraph_format.space_after = Pt(3) if is_large else Pt(5)
+            p.paragraph_format.line_spacing = 1.15 if is_large else 1.2
+            add_formatted_runs(p, content, default_color=TEXT_COLOR, font_size=base_size)
             
     doc.save(output_path)
     print(f"Successfully generated DOCX at {output_path}")
@@ -587,7 +612,7 @@ if __name__ == "__main__":
     docx_path = DOCX_DIR / f"{base_name}.docx"
     pdf_path = PDF_DIR / f"{base_name}.pdf"
     
-    parsed = parse_markdown(str(md_file))
-    build_docx(parsed, str(docx_path))
+    parsed, metadata = parse_markdown(str(md_file))
+    build_docx(parsed, str(docx_path), metadata=metadata)
     run_officecli_checks(str(docx_path))
     convert_docx_to_pdf(str(docx_path), str(pdf_path))
