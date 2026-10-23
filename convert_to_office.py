@@ -4,6 +4,14 @@ import os
 import sys
 import re
 import subprocess
+from pathlib import Path
+
+# ワークスペース内 venv site-packages をフォールバック探索 (Mac/Linux sandbox対応)
+ws_root = Path(__file__).resolve().parents[2]
+cand_sp = ws_root / "scratch" / "python" / ".venv" / "lib" / "python3.13" / "site-packages"
+if cand_sp.is_dir() and str(cand_sp) not in sys.path:
+    sys.path.append(str(cand_sp))
+
 import docx
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
