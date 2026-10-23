@@ -274,7 +274,8 @@ def build_docx(parsed_data, output_path, metadata=None):
     doc = docx.Document()
     
     # 用紙サイズを日本標準の A4 (210mm x 297mm) に設定
-    margin_val = Inches(0.53) if is_large else Inches(1)
+    # 大活字（14pt）時は1枚に固執せず、適度な余白（約16mm=0.63インチ）と可読性を優先
+    margin_val = Inches(0.63) if is_large else Inches(1)
     for section in doc.sections:
         section.page_width = Inches(8.27)   # 210mm
         section.page_height = Inches(11.69) # 297mm
@@ -299,9 +300,9 @@ def build_docx(parsed_data, output_path, metadata=None):
         if item_type == 'h1':
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p.paragraph_format.space_before = Pt(2) if is_large else Pt(8)
-            p.paragraph_format.space_after = Pt(6) if is_large else Pt(14)
-            p.paragraph_format.line_spacing = 1.15 if is_large else 1.2
+            p.paragraph_format.space_before = Pt(6) if is_large else Pt(8)
+            p.paragraph_format.space_after = Pt(10) if is_large else Pt(14)
+            p.paragraph_format.line_spacing = 1.2
             
             # 見出し1テキスト
             add_formatted_runs(p, content, default_color=PRIMARY_COLOR)
@@ -311,8 +312,8 @@ def build_docx(parsed_data, output_path, metadata=None):
                 
         elif item_type == 'h2':
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(6) if is_large else Pt(14)
-            p.paragraph_format.space_after = Pt(2) if is_large else Pt(6)
+            p.paragraph_format.space_before = Pt(10) if is_large else Pt(14)
+            p.paragraph_format.space_after = Pt(4) if is_large else Pt(6)
             p.paragraph_format.keep_with_next = True
             
             add_formatted_runs(p, content, default_color=PRIMARY_COLOR)
@@ -322,8 +323,8 @@ def build_docx(parsed_data, output_path, metadata=None):
                 
         elif item_type == 'h3':
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(4) if is_large else Pt(10)
-            p.paragraph_format.space_after = Pt(2) if is_large else Pt(4)
+            p.paragraph_format.space_before = Pt(6) if is_large else Pt(10)
+            p.paragraph_format.space_after = Pt(3) if is_large else Pt(4)
             p.paragraph_format.keep_with_next = True
             
             add_formatted_runs(p, content, default_color=DARK_TEAL)
@@ -336,8 +337,8 @@ def build_docx(parsed_data, output_path, metadata=None):
             p = doc.add_paragraph(style='List Bullet')
             p.paragraph_format.left_indent = Inches(0.2 * (level + 1))
             p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(2.5) if is_large else Pt(3)
-            p.paragraph_format.line_spacing = 1.15
+            p.paragraph_format.space_after = Pt(3)
+            p.paragraph_format.line_spacing = 1.2
             
             add_formatted_runs(p, text, default_color=TEXT_COLOR, font_size=base_size)
             
@@ -346,8 +347,8 @@ def build_docx(parsed_data, output_path, metadata=None):
             p = doc.add_paragraph()
             p.paragraph_format.left_indent = Inches(0.2 * (level + 1))
             p.paragraph_format.space_before = Pt(0)
-            p.paragraph_format.space_after = Pt(2.5) if is_large else Pt(3)
-            p.paragraph_format.line_spacing = 1.15
+            p.paragraph_format.space_after = Pt(3)
+            p.paragraph_format.line_spacing = 1.2
             
             # 番号プレフィックスを太字で追加
             run_num = p.add_run(f"{num_prefix}. ")
@@ -362,7 +363,7 @@ def build_docx(parsed_data, output_path, metadata=None):
             tag, lines_or_text = content
             table = doc.add_table(rows=1, cols=1)
             table.autofit = False
-            table.columns[0].width = Inches(7.2) if is_large else Inches(6.5)
+            table.columns[0].width = Inches(7.0) if is_large else Inches(6.5)
             cell = table.cell(0, 0)
             
             # タグに応じた色分け
