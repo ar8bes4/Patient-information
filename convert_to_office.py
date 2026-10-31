@@ -602,7 +602,16 @@ def convert_docx_to_pdf(docx_path, pdf_path):
     if soffice_cmd:
         try:
             out_dir = str(Path(pdf_path).parent.resolve())
-            cmd = [soffice_cmd, "--headless", "--convert-to", "pdf", abs_docx, "--outdir", out_dir]
+            cmd = [
+                soffice_cmd,
+                "-env:UserInstallation=file:///tmp/libreoffice_profile",
+                "--headless",
+                "--convert-to",
+                "pdf",
+                abs_docx,
+                "--outdir",
+                out_dir,
+            ]
             res = subprocess.run(cmd, capture_output=True, text=True)
             if res.returncode == 0:
                 print(f"Successfully converted {docx_path} to {pdf_path} (via LibreOffice)")
